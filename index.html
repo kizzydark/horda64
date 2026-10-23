@@ -37,6 +37,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0f1430;color:var(--
 .slot.leg{border-color:var(--gold);box-shadow:0 0 10px var(--gold)}
 .slot b{position:absolute;right:-3px;bottom:-5px;font:900 10px Nunito;background:#000;border-radius:6px;padding:0 3px;color:#fff}
 #timerBox{display:flex;flex-direction:column;align-items:center;flex:1}
+#autoTag{position:absolute;right:12px;top:58px;font:900 12px Nunito;color:#9ae8ff;text-shadow:0 2px 0 #000;display:none}
+#autoWhy{display:none;margin:12px auto 0;max-width:640px;text-align:center;font:900 15px Nunito;color:#9ae8ff;background:rgba(0,0,0,.35);border:2px solid rgba(154,232,255,.4);border-radius:10px;padding:6px 12px}
+.card.autoPick{box-shadow:0 12px 0 #000,0 0 0 4px #9ae8ff,0 0 30px rgba(154,232,255,.8);transform:translateY(-8px) scale(1.04)}
+.card.autoBan{opacity:.45;outline:4px dashed var(--red)}
 #dashBtn{display:none;position:absolute;right:22px;bottom:96px;width:78px;height:78px;border-radius:50%;border:4px solid #000;background:rgba(122,208,255,.85);font-size:34px;box-shadow:0 5px 0 #000;pointer-events:auto;touch-action:none}
 @media (pointer:coarse){#dashBtn{display:block}}
 #coopBar{display:none;position:absolute;left:50%;bottom:10px;transform:translateX(-50%);gap:8px;pointer-events:none}
@@ -242,6 +246,7 @@ body.glitch #glitch{display:block}
   </div>
   <div id="objectives"></div>
   <div id="coopBar"></div>
+  <div id="autoTag"></div>
   <button id="dashBtn" aria-label="Esquivar">💨</button>
   <div id="hpBox"><div id="pname"></div><div class="hpb"><div id="hpfill"></div></div><span id="hptext"></span></div>
 </div>
@@ -1192,6 +1197,35 @@ const MOVEMENT = {
   lookAhead: 0.22, lookMax: 2.6,          // câmera olha à frente do movimento (solo e online)
 };
 
+/* ------------------------------------------------------- AUTO PLAY (auto-build por foco)
+   Cada carta ganha uma nota por foco; a nota final é a média ponderada pelos pesos do jogador (0 a 5).
+   stat: quanto 1 "unidade" de cada atributo vale em cada foco   ref: o tamanho de 1 unidade (ex.: +10% de XP)  */
+const AUTOPLAY = {
+  names: { xp: 'XP', qtd: 'Quantidade', dano: 'Dano', qual: 'Qualidade', def: 'Defesa' },
+  presets: {
+    farm:        { name: 'Farm de XP',        w: { xp: 5, qtd: 2, dano: 2, qual: 0, def: 0 } },
+    chuva:       { name: 'Chuva de Magias',   w: { xp: 2, qtd: 5, dano: 2, qual: 0, def: 0 } },
+    chefe:       { name: 'Matador de Chefes', w: { xp: 0, qtd: 0, dano: 5, qual: 3, def: 1 } },
+    lendaria:    { name: 'Build Lendária',    w: { xp: 2, qtd: 0, dano: 3, qual: 5, def: 0 } },
+    equilibrado: { name: 'Equilibrado',       w: { xp: 3, qtd: 3, dano: 3, qual: 3, def: 3 } },
+    tanque:      { name: 'Tanque',            w: { xp: 0, qtd: 0, dano: 2, qual: 0, def: 5 } },
+  },
+  stat: {
+    growth: { xp: 1.4 }, magnet: { xp: 0.6 }, luck: { xp: 0.15, qual: 0.9 }, greed: { xp: 0.05 },
+    amount: { qtd: 1.3, xp: 0.4, dano: 0.5 }, cooldown: { qtd: 0.8, dano: 0.6 }, duration: { qtd: 0.6, dano: 0.2 }, area: { qtd: 0.5, xp: 0.6, dano: 0.2 },
+    power: { dano: 1.2, xp: 0.6 }, crit: { dano: 0.9, xp: 0.2 }, seBonus: { dano: 0.7, xp: 0.2 }, 'type:*': { dano: 0.9, xp: 0.45 },
+    hpPct: { def: 1 }, armor: { def: 0.9 }, regen: { def: 0.7 }, lifesteal: { def: 0.6, dano: 0.15 }, dodge: { def: 0.8 }, thorns: { def: 0.4 }, sash: { def: 0.6 },
+    speed: { def: 0.35, xp: 0.25 }, knock: { def: 0.35 }, flinch: { def: 0.3, dano: 0.1 }, dashCd: { def: 0.4 }, dashDist: { def: 0.2 },
+  },
+  ref: { growth: 0.1, magnet: 0.2, luck: 0.1, greed: 0.2, amount: 1, cooldown: 0.08, duration: 0.1, area: 0.1, power: 0.1, crit: 0.05, seBonus: 0.1, 'type:*': 0.15,
+    hpPct: 0.1, armor: 1, regen: 0.5, lifesteal: 0.02, dodge: 0.05, thorns: 5, sash: 1, speed: 0.05, knock: 0.2, flinch: 0.05, dashCd: 0.08, dashDist: 0.12 },
+  rerollBelow: 0.55,   // re-rola se a melhor carta vale menos que isso
+  banishBelow: 0.18,   // bane cartas novas que quase não servem ao foco
+  skipBelow: 0.12,     // pula se nada vale a pena
+  decisionSec: 0.9,    // tempo mostrando a escolha antes de confirmar (0 = instantâneo)
+  chestSec: 1.4,       // tempo olhando o baú antes de fechar
+};
+
 /* ------------------------------------------------------- BALANCEAMENTO
    Botões gerais de dificuldade. Mexa aqui antes de mexer em cada inimigo.   */
 const BALANCE = {
@@ -1223,7 +1257,7 @@ const TEXTS = {
   splash: ['O Carpinútil pulou...', '...e nada aconteceu.'],
 };
 
-window.GAME_DATA = { MOVEMENT, BALANCE, TYPES, CHART, PLAYERS, MOVES, ITEMS, ENEMIES, BOSSES, MAPS, SHOP, ACHIEVEMENTS, TEXTS, STAGES, ALTAR_BOOSTS, SHRINES, COOP };
+window.GAME_DATA = { AUTOPLAY, MOVEMENT, BALANCE, TYPES, CHART, PLAYERS, MOVES, ITEMS, ENEMIES, BOSSES, MAPS, SHOP, ACHIEVEMENTS, TEXTS, STAGES, ALTAR_BOOSTS, SHRINES, COOP };
 })();
 
 </script>
@@ -1836,7 +1870,7 @@ function defaultSave() {
     stats: { totalKills: 0, runs: 0, wins: 0, winsByChar: {}, winsByMap: {}, bossKills: {}, stones: {}, mewFound: false, noHeal15: false,
       superEff: 0, carpinutilKills: 0, megas: 0, legendaries: 0, finalForms: 0, shinyKills: 0, spent: 0, bestTime: {},
       portals: 0, maxStage: 0, fastBoss: 0, swarmBest: 0, chestsBought: 0, altars: 0, goldenAltars: 0, greedUsed: 0, challenges: 0, cursedKills: 0, totems: 0, pots: 0, deaths: 0, noChestWin: false, stageClears: {} },
-    opts: { sfx: 0.6, music: 0.35, shake: 1, numbers: 1, gfx: 'n64' }, v: 3,
+    opts: { sfx: 0.6, music: 0.35, shake: 1, numbers: 1, gfx: 'n64', autoWalk: 0, autoBuild: 0, autoShow: 1, autoPreset: 'equilibrado', autoW: { xp: 3, qtd: 3, dano: 3, qual: 3, def: 3 } }, v: 3,
   };
 }
 function fillDefaults(dst, def) { for (const k in def) { if (dst[k] === undefined) dst[k] = def[k]; else if (def[k] && typeof def[k] === 'object' && !Array.isArray(def[k])) fillDefaults(dst[k], def[k]); } return dst; }
@@ -2905,7 +2939,7 @@ function setGhost(p, on) {
 }
 /* fantasma: anda devagar; outro jogador vivo ao lado por COOP.reviveTime segundos revive */
 function updateDowned(dt) {
-  const [ix, iz] = devVec(PL.dev); const sp = S.speed * COOP.ghostSpeed;
+  const [ix0, iz0] = devVec(PL.dev); const [ix, iz] = PL.dev === 'net' || PL.dev === 'bot' ? [ix0, iz0] : pilotInput(PL, ix0, iz0, false, dt); const sp = S.speed * COOP.ghostSpeed;
   PL.x += ix * sp * dt; PL.z += iz * sp * dt; PL.moving = Math.abs(ix) + Math.abs(iz) > 0.05;
   const g = PL.mesh; g.position.set(PL.x, 0.35 + Math.sin(RUN.time * 3 + PL.idx) * 0.15, PL.z); g.visible = true;
   let near = null; for (const q of PLAYERS) { if (q.down) continue; const dx = q.x - PL.x, dz = q.z - PL.z; if (dx * dx + dz * dz < COOP.reviveRange * COOP.reviveRange) { near = q; break; } }
@@ -3278,7 +3312,7 @@ function updatePlayer(dt) {
   if (PL.slowT > 0 && CH.passive.id !== 'senhor_ventos') { PL.slowT -= dt; sp *= 0.6; }
   let moving;
   if (PL.dev === 'net') moving = !!PL.netMoving; // anda pelos pacotes (netApplyInput)
-  else { moving = stepMove(PL, ix, iz, dt, sp, takeDash(PL.dev), S.dashCdMax, S.dashDist); if (PL.justDashed) { PL.invuln = Math.max(PL.invuln, D.MOVEMENT.dash.iframes); dashFx(PL); } }
+  else { const [ax, az, ad] = PL.dev === 'bot' ? [ix, iz, false] : pilotInput(PL, ix, iz, takeDash(PL.dev), dt); moving = stepMove(PL, ax, az, dt, sp, ad, S.dashCdMax, S.dashDist); if (PL.justDashed) { PL.invuln = Math.max(PL.invuln, D.MOVEMENT.dash.iframes); dashFx(PL); } }
   PL.moving = moving;
   if (PL.dashT > 0 && Math.random() < 0.8) particles(PL.x + rr(-0.2, 0.2), 0.5, PL.z + rr(-0.2, 0.2), PL.color || '#bfe8ff', 1, 0.5, 0.25, 0.25, 0);
   if (moving && !(PL.dashT > 0)) { PL.stepT = (PL.stepT || 0) - dt; if (PL.stepT <= 0) { PL.stepT = 0.14; particles(PL.x + rr(-0.15, 0.15), 0.08, PL.z + rr(-0.15, 0.15), RUN.map.dust || '#c8b080', 2, 1.1, 0.11, 0.35, 4); } }
@@ -3981,6 +4015,7 @@ function updateHUD(dt) {
   hudT -= dt; if (hudT > 0 && !slotsDirty) return; hudT = 0.1;
   $('lvl').textContent = 'Nv ' + PL.level;
   updateStageHUD();
+  { const at = $('autoTag'), on = autoOn(), wk = walkOn(); at.style.display = on || wk ? 'block' : 'none'; if (on || wk) at.textContent = '🤖 ' + [wk ? ((PL.manualT || 0) > 0 ? 'Você no controle' : 'Andando') : '', on ? `Build: ${autoPresetName()}` : ''].filter(Boolean).join(' • '); }
   if (isCoop()) { const h = PLAYERS.map((q) => `<div class="cp${q.down ? ' down' : ''}" style="border-color:${q.color}"><div style="color:${q.color}">${q.tag} • ${esc(q.formName)} • Nv ${q.level}${q.down ? ' 💀' : ''}</div><div class="hb"><i style="width:${clamp(q.hp / q.S.maxHp * 100, 0, 100).toFixed(0)}%"></i></div><div class="xb"><i style="width:${(q.xp / q.xpNext * 100).toFixed(0)}%"></i></div><div class="mv">${q.moves.map((m) => m.def.icon).join('')} ${q.items.map((x) => D.ITEMS[x.id].icon).join('')}</div></div>`).join(''); if (h !== RUN.coopHTML) { RUN.coopHTML = h; $('coopBar').innerHTML = h; } }
   $('kills').textContent = RUN.kills.toLocaleString('pt-BR');
   $('coins').textContent = Math.floor(RUN.coins).toLocaleString('pt-BR');
@@ -4133,6 +4168,7 @@ function buildMenu() {
       <div class="opt"><span>Tremida de câmera</span><button class="btn ${o.shake ? '' : 'gray'}" data-go="toggle" data-id="shake">${o.shake ? 'Ligada' : 'Desligada'}</button></div>
       <div class="opt"><span>Números de dano</span><button class="btn ${o.numbers ? '' : 'gray'}" data-go="toggle" data-id="numbers">${o.numbers ? 'Ligados' : 'Desligados'}</button></div>
       <div class="opt"><span>Estilo gráfico</span><button class="btn" data-go="gfxs" data-id="opts">${esc(GS.name)} ▸</button></div></div>
+      ${autoOptsHTML()}
       <div class="box"><div class="muted">Progresso salvo neste navegador (localStorage).</div><div class="row" style="margin-top:8px"><button class="btn red" data-go="reset">${MENU.confirmReset ? 'Tem certeza? Clique de novo' : 'Apagar progresso'}</button></div></div>
       <div class="row"><button class="btn gray" data-go="main" data-back="1">← Voltar</button></div>`;
   } else if (s === 'coop') {
@@ -4199,7 +4235,7 @@ function removeBossMeshes(b) {
   for (const s of b.segs) scene.remove(s); b.segs = [];
 }
 function startRun(charId, mapId, team) {
-  audioInit();
+  audioInit(); AUTO.dps = 0; AUTO.lastDmg = 0;
   clearRun();
   team = team && team.length > 1 ? team.slice(0, COOP.max) : [{ char: charId || (team && team[0] && team[0].char), dev: 'any' }]; charId = team[0].char;
   CH = D.PLAYERS[charId]; const map = D.MAPS.find((m) => m.id === mapId) || D.MAPS[0];
@@ -4316,6 +4352,7 @@ function renderPauseOpts() {
     <div class="opt"><span>Números de dano</span><button class="btn ${o.numbers ? '' : 'gray'}" data-go="toggle" data-id="numbers">${o.numbers ? 'Ligados' : 'Desligados'}</button></div>
     <div class="opt" style="align-items:start"><span>Estilo gráfico</span><div><div class="row" style="margin:0;gap:6px;flex-wrap:wrap">${Object.entries(GFX_STYLES).map(([id, st]) => `<button class="btn ${id === GFX_ID ? '' : 'gray'}" style="font-size:13px;padding:6px 10px" data-go="pauseGfx" data-id="${id}">${esc(st.name)}</button>`).join('')}</div>
       <div class="muted" style="margin-top:6px;color:${PAUSE_GFX ? '#ffd84a' : ''}">${PAUSE_GFX ? `Trocar para <b>${esc(GFX_STYLES[PAUSE_GFX].name)}</b> recarrega o jogo e ENCERRA esta partida. Clique de novo para confirmar.` : `Agora: ${esc(GS.name)}. ${esc(GS.desc)}`}</div></div></div></div>
+    ${autoOptsHTML()}
     <div class="row" style="justify-content:center;margin-top:10px"><button class="btn gray" data-go="pauseBack" data-back="1">← Voltar</button></div>`;
 }
 let PAUSE_OPTS = false, PAUSE_GFX = null;
@@ -4630,6 +4667,7 @@ function onSecond() {
   const left = STG.time - RUN.stageT; if (left <= 60 && left > 59) banner('1 MINUTO PARA O ENXAME FINAL', PORTAL && PORTAL.state === 'exit' ? 'O portal está aberto: corra!' : 'Ache o portal e derrote o chefe!', 2.4, '#ff8060');
   MUS.intense = aliveN > 260;
   RUN.achT++; if (RUN.achT % 5 === 0) { checkAchievements(); persist(); }
+  AUTO.dps = lerp(AUTO.dps || 0, RUN.dmgDealt - (AUTO.lastDmg || 0), 0.2); AUTO.lastDmg = RUN.dmgDealt;
   if (RUN.time >= RUN.nextAlfa && !RUN.reaper) { RUN.nextAlfa += 120; spawnAlfa(); }
 }
 function spawnAlfa() {
@@ -4676,6 +4714,8 @@ function frame(now) {
 function tick(rdt) {
   fpsAcc += rdt; fpsN++; if (fpsAcc > 0.5) { fps = fpsN / fpsAcc; fpsAcc = 0; fpsN = 0; }
   pollGamepad(rdt);
+  if (state === 'levelup' || NETUI.open) autoStep(rdt); else if (AUTO.dec) autoClear();
+  if (state === 'chest' && autoOn()) { AUTO.chestT += rdt; if (AUTO.chestT > D.AUTOPLAY.chestSec) { AUTO.chestT = 0; closeChest(); closeChest(); } } else AUTO.chestT = 0;
   if (state === 'playing' && RUN.hitstop > 0) { RUN.hitstop -= rdt; updateHUD(rdt); }
   else if (state === 'playing') {
     let ts = RUN.slowmo > 0 ? 0.25 : 1; if (RUN.slowmo > 0) RUN.slowmo -= rdt; if (DEBUG && DBG.fast) ts *= 4;
@@ -4766,6 +4806,8 @@ window.addEventListener('keydown', (e) => {
     if (e.code === 'Enter' || e.code === 'NumpadEnter' || e.code === 'ShiftRight') { DASHQ.kbB = DASHQ.any = true; }
   }
   if (NET.on && !NETUI.open && !e.repeat && (state === 'playing' || state === 'netview') && e.code >= 'Digit1' && e.code <= 'Digit4') { emote(+e.code.slice(5) - 1); return; }
+  if (e.code === 'KeyY' && !e.repeat && (state === 'playing' || state === 'levelup' || state === 'paused' || state === 'netview')) { autoToggle(); if (state === 'paused') renderPauseOpts(); return; }
+  if (e.code === 'KeyT' && !e.repeat && (state === 'playing' || state === 'levelup' || state === 'paused' || state === 'netview')) { walkToggle(); if (state === 'paused') renderPauseOpts(); return; }
   if (NETUI.open && !e.repeat) { if (e.code >= 'Digit1' && e.code <= 'Digit4') { netCardAct(+e.code.slice(5) - 1); return; } if (e.code === 'KeyR') { netCardAct(-1, 'reroll'); return; } if (e.code === 'KeyP' && NET.role === 'guest') { netCardAct(-1, 'skip'); return; } }
   if (state === 'menu' && MENU.screen === 'title' && !e.repeat && !/^(Shift|Control|Alt|Meta)/.test(e.code) && e.code !== 'KeyM') { e.preventDefault(); onGo('main', {}); return; }
   if (state === 'menu' && MENU.screen === 'coop' && COOP_KEYS[e.code]) { e.preventDefault(); coopInput(COOP_KEYS[e.code][0], COOP_KEYS[e.code][1]); return; }
@@ -4782,8 +4824,8 @@ window.addEventListener('keydown', (e) => {
   if (DEBUG) debugKey(e.code);
 });
 window.addEventListener('keyup', (e) => { KEYS[e.code] = false; });
-window.addEventListener('blur', () => { for (const k in KEYS) KEYS[k] = false; if (state === 'playing' && !DEBUG) togglePause(); });
-document.addEventListener('visibilitychange', () => { if (document.hidden && state === 'playing' && !DEBUG) togglePause(); });
+window.addEventListener('blur', () => { for (const k in KEYS) KEYS[k] = false; if (state === 'playing' && !DEBUG && !walkOn()) togglePause(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && state === 'playing' && !DEBUG && !walkOn()) togglePause(); });
 document.addEventListener('click', (e) => {
   audioInit();
   const card = e.target.closest('.card'); if (card && NETUI.open) { netCardAct(+card.dataset.i); return; } if (card && state === 'levelup') { chooseCard(+card.dataset.i); return; }
@@ -4792,6 +4834,7 @@ document.addEventListener('click', (e) => {
 });
 document.addEventListener('mouseover', (e) => { const b = e.target.closest && e.target.closest('.mmenu .btn'); if (b && b !== NAVF) { if (NAVF) NAVF.classList.remove('focus'); NAVF = b; b.classList.add('focus'); menuDesc(b); } });
 document.addEventListener('input', (e) => {
+  const af = e.target.dataset && e.target.dataset.aw; if (af) { SAVE.opts.autoW = Object.assign(autoW(), { [af]: +e.target.value }); SAVE.opts.autoPreset = 'personalizado'; persist(); const v = document.querySelector(`[data-awv="${af}"]`); if (v) v.textContent = e.target.value; return; }
   const k = e.target.dataset && e.target.dataset.opt; if (!k) return; SAVE.opts[k] = +e.target.value; applyVolumes(); persist();
 });
 /* joystick de toque (aparece onde o dedo encosta) + botão de esquiva */
@@ -4812,6 +4855,7 @@ function onGo(what, ds) {
     case 'netMap': if (NET.role === 'host') { const ms = D.MAPS.filter((m) => isMapUnlocked(m.id)); const i = ms.findIndex((m) => m.id === NET.lobby.map); NET.lobby.map = ms[(i + 1) % ms.length].id; netLobbyBroadcast(); } break;
     case 'netStart': if (NET.role === 'host') netHostStart(); break;
     case 'netInvite': netCopyInvite(); break;
+    case 'autoPreset': { const p = D.AUTOPLAY.presets[ds.id]; if (p) { SAVE.opts.autoPreset = ds.id; SAVE.opts.autoW = Object.assign({}, p.w); persist(); } if (state === 'paused') renderPauseOpts(); else buildMenu(); break; }
     case 'netLeave': netClose(); NET.status = ''; MENU.screen = 'online'; buildMenu(); break;
     case 'coopGo': if (MENU.coop && MENU.coop.slots.length >= 2 && MENU.coop.slots.every((x) => x.ready)) { MENU.coopReady = true; if (!isMapUnlocked(MENU.map)) MENU.map = 'bosque'; MENU.screen = 'maps'; buildMenu(); } else sfx('deny'); break;
     case 'again': if (NET.role === 'host') { netHostStart(); break; } startRun(RUN ? RUN.char : MENU.char, RUN ? RUN.startMap : MENU.map, RUN ? RUN.team : null); break;
@@ -4824,7 +4868,7 @@ function onGo(what, ds) {
     case 'chestOk': closeChest(); break;
     case 'buy': { const u = D.SHOP.find((x) => x.id === ds.id); const l = SAVE.shop[u.id] || 0; const c = shopCost(u); if (l < u.max && SAVE.coins >= c) { SAVE.coins -= c; SAVE.shop[u.id] = l + 1; SAVE.stats.spent += c; persist(); sfx('coin'); checkAchievements(); } else sfx('deny'); buildMenu(); break; }
     case 'refund': { const t = shopRefund(); toast('Reembolso', `+${t} de ouro`); buildMenu(); break; }
-    case 'toggle': SAVE.opts[ds.id] = SAVE.opts[ds.id] ? 0 : 1; persist(); if (state === 'paused') renderPauseOpts(); else buildMenu(); break;
+    case 'toggle': SAVE.opts[ds.id] = SAVE.opts[ds.id] ? 0 : 1; persist(); AUTO.dec = null; if (state === 'paused') renderPauseOpts(); else buildMenu(); break;
     case 'selGfx': if (GFX_STYLES[ds.id] && ds.id !== GFX_ID) { SAVE.opts.gfx = ds.id; persist(); const u = new URL(location.href); u.searchParams.delete('gfx'); location.replace(u.href); } break;
     case 'reset': if (MENU.confirmReset) { SAVE = defaultSave(); persist(); MENU.char = null; MENU.map = null; MENU.screen = 'main'; toast('Progresso apagado', 'Bem-vindo(a) de volta ao Bosque Verdejante'); } else MENU.confirmReset = 1; buildMenu(); break;
   }
@@ -4896,6 +4940,7 @@ function netHostMsg(c, raw) {
   if (!c.slot) return;
   if (m.t === 'in') { const p = PLAYERS.find((q) => q.conn === c); if (p) netApplyInput(p, m); }
   else if (m.t === 'pick') { const p = PLAYERS.find((q) => q.conn === c); if (p) netPick(p, m.k | 0, m.act); }
+  else if (m.t === 'auto') { const p = PLAYERS.find((q) => q.conn === c); const w = m.on && m.w ? Object.fromEntries(AFOC.map((f) => [f, clamp(+m.w[f] || 0, 0, 5)])) : null; if (p) p.autoNet = w; else c.slot && (c.slot.autoNet = w); }
   else if (m.t === 'emo') { const p = PLAYERS.find((q) => q.conn === c); if (p && RUN) netEmote(p, m.k | 0); }
   else if (m.t === 'char' && D.PLAYERS[m.char] && !(RUN && state !== 'menu')) { c.slot.char = m.char; netLobbyBroadcast(); }
   else if (m.t === 'ping') netSend(c, { t: 'pong', c: m.c });
@@ -4911,7 +4956,7 @@ function netHostStart() {
   const L = NET.lobby; if (!L || L.slots.length < 2) return;
   startRun(null, L.map, L.slots.map((sl, k) => ({ char: sl.char, dev: k === 0 ? 'any' : 'net' })));
   RUN.online = true; NET.stats0 = JSON.parse(JSON.stringify(SAVE.stats)); for (const q of PLAYERS) q.netStats = {};
-  L.slots.forEach((sl, k) => { const q = PLAYERS[k]; q.conn = k ? sl.conn || null : null; q.netToken = sl.token; q.netAck = 0; q.netMoving = false; });
+  L.slots.forEach((sl, k) => { const q = PLAYERS[k]; q.conn = k ? sl.conn || null : null; q.netToken = sl.token; q.netAck = 0; q.netMoving = false; q.autoNet = sl.autoNet || null; });
   for (const c of NET.conns) netSend(c, netStartMsg());
   banner(`SALA ${NET.code} • FASE 1`, 'Achem o portal juntos: ele só funciona com TODOS os vivos dentro!', 3.2, '#7ad0ff');
 }
@@ -5000,7 +5045,14 @@ function netBinFor(me, withPicks) {
 }
 /* ---------- cartas, baús e evoluções sem pausar ninguém (online) */
 function netQueueTick() {
-  for (const q of PLAYERS) { if (q.down || q.netCards || !q.queue.length || (q !== PLAYERS[0] && !q.conn)) continue; usePlayer(q); netProcess(q, q.queue.shift()); }
+  for (const q of PLAYERS) {
+    if (q !== PLAYERS[0] && q.netCards && q.autoNet && q.conn && RUN.time >= (q.autoAt || 0)) { // convidado com auto-build: o anfitrião escolhe com os pesos dele
+      usePlayer(q); const C = q.netCards, d = autoDecide(C.cards, C.mode, q, q.autoNet); netSend(q.conn, { t: 'toast', a: d.act === 'pick' ? '🤖 Auto-build escolheu' : '🤖 Auto-build', b: d.reason });
+      netPick(q, d.idx || 0, d.act === 'pick' || d.act === 'banish' ? undefined : d.act); continue;
+    }
+    if (q.down || q.netCards || !q.queue.length || (q !== PLAYERS[0] && !q.conn)) continue; usePlayer(q); netProcess(q, q.queue.shift());
+    if (q.netCards && q.autoNet) q.autoAt = RUN.time + 0.5;
+  }
   usePlayer(PLAYERS[0]);
 }
 function netProcess(q, it) {
@@ -5126,7 +5178,7 @@ function netMakeAvatar(q) {
 }
 function netClearAvatars() { for (const a of NET.av) { scene.remove(a.mesh); disposeModelMesh(a.mesh); scene.remove(a.ring); a.ring.material.dispose(); scene.remove(a.sh); a.sh.material.dispose(); } NET.av = []; NET.me = null; }
 function netGuestStart(m) {
-  clearRun(); netClearAvatars(); netGuestReset(); NET.code = m.code || NET.code; NET.resDone = false;
+  clearRun(); netClearAvatars(); netGuestReset(); NET.code = m.code || NET.code; NET.resDone = false; NET.autoSent = '';
   const map = D.MAPS.find((x) => x.id === m.map) || D.MAPS[0];
   setMenuModel(null); if (PEDESTAL) PEDESTAL.visible = false; setupWorld(map); WORLD.chunkKey = '';
   NET.av = m.players.map(netMakeAvatar); NET.me = NET.av.find((a) => a.idx === NET.myIdx) || NET.av[1]; NET.hist = []; NET.seq = 0;
@@ -5291,6 +5343,7 @@ function netGuestHUD() {
   $('xpfill').style.width = ((me.xpf || 0) * 100).toFixed(1) + '%'; $('lvl').textContent = 'Nv ' + (me.lv || 1);
   const h = NET.av.map((q) => `<div class="cp${q.down ? ' down' : ''}" style="border-color:${q.color}"><div style="color:${q.color}">${q.tag}${q === me ? ' (você)' : ''} • ${esc(q.name || '')} • Nv ${q.lv || 1}${q.down ? ' 💀' : ''}${q.gone ? ' • caiu' : ''}</div><div class="hb"><i style="width:${clamp((q.hp || 0) / (q.mh || 1) * 100, 0, 100).toFixed(0)}%"></i></div><div class="xb"><i style="width:${((q.xpf || 0) * 100).toFixed(0)}%"></i></div><div class="mv">${q.mvI || ''} ${q.itI || ''}</div></div>`).join('');
   if (h !== NET.hudH) { NET.hudH = h; $('coopBar').innerHTML = h; }
+  { const at = $('autoTag'), on = !!SAVE.opts.autoBuild, wk = walkOn(); at.style.display = on || wk ? 'block' : 'none'; if (on || wk) at.textContent = '🤖 ' + [wk ? ((me.manualT || 0) > 0 ? 'Você no controle' : 'Andando') : '', on ? `Build: ${autoPresetName()}` : ''].filter(Boolean).join(' • '); }
   const b = [...NG.bosses.values()][0], el = $('bossBar');
   if (!b) el.style.display = 'none'; else { el.style.display = 'block'; $('bossName').textContent = b.def.invincible ? 'ERR#404 ▓▒░ ??? ░▒▓' : b.def.name + (b.def.legendary ? ' ★ LENDÁRIO' : ''); $('bossFill').style.width = (b.def.invincible ? 50 + Math.random() * 50 : clamp(b.h * 100, 0, 100)).toFixed(1) + '%'; }
 }
@@ -5311,7 +5364,7 @@ function netGuestUpdate(dt) {
   const me = NET.me; if (!me) return; netRates(dt);
   updateWorld(VIEW.x, VIEW.z);
   if (!NET.paused) {
-    const [ix, iz] = inputVec(); const dq = !!DASHQ.any; DASHQ.any = false; const sq = ++NET.seq; NET.hist.push({ s: sq, x: ix, z: iz, dt, d: dq }); if (NET.hist.length > 300) NET.hist.shift();
+    const [ix, iz, dq] = pilotInput(me, ...inputVec(), !!DASHQ.any, dt); DASHQ.any = false; const sq = ++NET.seq; NET.hist.push({ s: sq, x: ix, z: iz, dt, d: dq }); if (NET.hist.length > 300) NET.hist.shift();
     netSend(NET.conns[0], { t: 'in', s: sq, x: +ix.toFixed(3), z: +iz.toFixed(3), dt: +dt.toFixed(4), d: dq ? 1 : 0 }); netMove(me, ix, iz, dt, dq);
   }
   const rt = performance.now() - NET_DELAY, tm = GFX.time.value;
@@ -5326,7 +5379,7 @@ function netGuestUpdate(dt) {
   }
   VIEW.x = me.rx; VIEW.z = me.rz; obsRebuild([VIEW]);
   netGuestRender(dt); netGuestStageAnim(dt); updateFx(dt); updateParticles(dt); netGuestHUD();
-  NET.pingT -= dt; if (NET.pingT <= 0) { NET.pingT = 2; netSend(NET.conns[0], { t: 'ping', c: performance.now() }); }
+  NET.pingT -= dt; if (NET.pingT <= 0) { NET.pingT = 2; netSend(NET.conns[0], { t: 'ping', c: performance.now() }); const au = JSON.stringify({ on: SAVE.opts.autoBuild ? 1 : 0, w: autoW() }); if (au !== NET.autoSent) { NET.autoSent = au; netSend(NET.conns[0], Object.assign({ t: 'auto' }, JSON.parse(au))); } }
 }
 function drawNetOverlay(dt) {
   drawNums(dt); drawStageOverlay(); g2.textAlign = 'center'; g2.lineJoin = 'round';
@@ -5351,6 +5404,224 @@ function netChar(dir) {
   const L = NET.lobby; if (!L) return; const chars = Object.keys(D.PLAYERS).filter(isCharUnlocked); const i0 = NET.role === 'host' ? 0 : NET.myIdx; const sl = L.slots[i0]; if (!sl) return;
   let i = chars.indexOf(sl.char); i = (i + dir + chars.length) % chars.length; const ch = chars[i]; MENU.char = ch;
   if (NET.role === 'host') { sl.char = ch; netLobbyBroadcast(); } else { sl.char = ch; netSend(NET.conns[0], { t: 'char', char: ch }); buildMenu(); }
+}
+
+/* ------------------------------------------------------------ AUTO-BUILD (escolhe as cartas pelo foco)
+   cardGains: quanto a carta melhora cada foco (xp, qtd, dano, qual, def), usando os números reais da magia/relíquia.
+   cardValue: média ponderada pelos pesos do jogador + o motivo em texto. autoDecide: escolher, re-rolar, banir ou pular. */
+const AFOC = ['xp', 'qtd', 'dano', 'qual', 'def'];
+const STAT_TXT = { growth: 'de XP', magnet: 'de ímã', luck: 'de sorte', greed: 'de ouro', amount: 'projétil', cooldown: 'de recarga', duration: 'de duração', area: 'de área', power: 'de poder', crit: 'de crítico',
+  seBonus: 'de dano na fraqueza', hpPct: 'de HP', armor: 'de armadura', regen: 'de regeneração', lifesteal: 'de roubo de vida', dodge: 'de esquiva', thorns: 'de espinhos', speed: 'de velocidade',
+  knock: 'de empurrão', flinch: 'de atordoar', sash: 'faixa', dashCd: 'de recarga da esquiva', dashDist: 'de distância da esquiva' };
+function statText(st, per) {
+  if (st.startsWith('type:')) return `+${Math.round(per * 100)}% de ${typeName(st.slice(5))}`;
+  if (st === 'amount') return `+${per} ${per > 1 ? 'projéteis' : 'projétil'}`; if (st === 'armor' || st === 'thorns' || st === 'sash') return `+${per} ${STAT_TXT[st]}`;
+  return `${st === 'cooldown' || st === 'dashCd' ? '−' : '+'}${Math.round(per * 100)}% ${STAT_TXT[st] || st}`;
+}
+function autoW() { const w = SAVE.opts.autoW || {}; const o = {}; for (const f of AFOC) o[f] = clamp(+w[f] || 0, 0, 5); return o; }
+function autoOn() { return !!SAVE.opts.autoBuild && !(RUN && RUN.noAuto); }
+function cardGains(c) {
+  const g = { xp: 0, qtd: 0, dano: 0, qual: 0, def: 0 }, why = [];
+  const add = (f, v, txt) => { if (!(v > 0)) return; g[f] += v; why.push([f, v, txt]); };
+  if (c.kind === 'move') {
+    const d = D.MOVES[c.id], m = PL.moves.find((x) => x.id === c.id);
+    if (m) {
+      const a = d.levels[m.lvl - 1], b = d.levels[m.lvl]; if (!b) return { g, why };
+      const rel = (k) => (a[k] ? (b[k] - a[k]) / a[k] : 0);
+      const dmg = rel('dmg'), amt = a.amount ? (b.amount - a.amount) / a.amount : 0, cd = a.cd ? (a.cd - b.cd) / a.cd : 0, dur = rel('duration');
+      const size = Math.max(rel('size'), rel('radius'), rel('width'), rel('length'), rel('range')), pierce = (b.pierce || 0) - (a.pierce || 0), chain = (b.chain || 0) - (a.chain || 0);
+      const dps = dmg + amt + cd + 0.5 * dur + 0.15 * pierce + 0.2 * chain;
+      add('dano', dps * 2.4, `+${Math.round(dps * 100)}% de dano/s em ${moveName(d, m.lvl + 1)}`);
+      add('qtd', (amt * 1.6 + cd * 0.8 + dur * 0.6 + pierce * 0.25 + chain * 0.35) * 2.2, amt > 0 ? `+${b.amount - a.amount} ${b.amount - a.amount > 1 ? 'projéteis' : 'projétil'} em ${moveName(d, m.lvl + 1)}` : `mais ${moveName(d, m.lvl + 1)} na tela`);
+      add('xp', (size * 1.1 + amt * 0.8 + pierce * 0.3 + dmg * 0.8 + cd * 0.5) * 2, size > 0 ? `+${Math.round(size * 100)}% de área (limpa mais horda)` : 'limpa a horda mais rápido');
+      if (LEGENDS[c.id]) {
+        const toMax = d.levels.length - m.lvl, hasItem = LEGENDS[c.id].some((L) => PL.items.find((it) => it.id === L.combo.item));
+        add('qual', (toMax <= 1 ? 2.6 : 0.6) * (hasItem ? 1.6 : 1), toMax <= 1 ? `${moveName(d, 8)} no máximo (pronta para suprema)` : 'caminho para uma suprema');
+      }
+    } else {
+      const free = 6 - PL.moves.length, aff = PL.types.indexOf(d.type) >= 0, many = ['projectile', 'orbit', 'strike', 'whip', 'boomerang'].includes(d.behavior);
+      add('qtd', many ? 2 : 1.3, `${d.stages[0][1]}: magia nova na tela`); add('dano', aff ? 1.5 : 0.9, aff ? `${d.stages[0][1]} tem afinidade com o seu elemento` : `${d.stages[0][1]}: dano novo`);
+      add('xp', 1.1, `${d.stages[0][1]} ajuda a limpar a horda`); if (LEGENDS[c.id]) add('qual', 0.8, `${d.stages[0][1]} tem suprema`);
+      const pen = free <= 1 ? 0.5 : free <= 2 ? 0.75 : 1; if (pen < 1) for (const f of AFOC) g[f] *= pen;
+    }
+  } else if (c.kind === 'item' || c.kind === 'custom') {
+    const effects = c.kind === 'item' ? D.ITEMS[c.id].effects : [{ stat: c.boost.stat, per: c.val }];
+    const it = c.kind === 'item' ? PL.items.find((x) => x.id === c.id) : null, dim = 1 / (1 + 0.18 * (it ? it.lvl : 0)), A = D.AUTOPLAY;
+    for (const e of effects) {
+      let st = e.stat, mult = 1;
+      if (st.startsWith('type:')) { const n = PL.moves.filter((m) => m.def.type === st.slice(5)).length; mult = n ? Math.min(1.5, 0.5 + n * 0.5) : 0.12; st = 'type:*'; }
+      const map = A.stat[st] || {}, u = e.per / (A.ref[st] || 0.1) * dim * mult;
+      for (const f in map) add(f, u * map[f], statText(e.stat, e.per));
+    }
+    if (c.kind === 'item') {
+      if (!it && PL.items.length >= 5) for (const f of AFOC) g[f] *= 0.8;
+      if (PL.moves.some((m) => !m.def.legendary && (LEGENDS[m.id] || []).some((L) => L.combo.item === c.id))) add('qual', 2.4, `${D.ITEMS[c.id].name} completa uma suprema`);
+    }
+  } else if (c.kind === 'heal') add('def', (1 - PL.hp / S.maxHp) * 3, 'cura 30% da vida');
+  else if (c.kind === 'coins') add('xp', 0.15, 'um trocado de ouro');
+  else if (c.kind === 'mega') add('qual', 3, `Forma Desperta: ${c.form.name}`);
+  return { g, why };
+}
+function cardValue(c, w) {
+  const { g, why } = cardGains(c), low = PL.hp < S.maxHp * 0.35; let tot = 0, ws = 0;
+  for (const f of AFOC) { const wf = w[f] + (f === 'def' && low ? 2 : 0); tot += wf * g[f]; ws += wf; }
+  let best = null, bv = -1; for (const [f, val, txt] of why) { const sc = (w[f] + (f === 'def' && low ? 2 : 0)) * val; if (sc > bv) { bv = sc; best = [f, txt]; } }
+  return { v: ws ? tot / ws : 0, reason: best ? `${best[1]} (foco ${D.AUTOPLAY.names[best[0]]})` : 'melhor opção' };
+}
+function autoDecide(cards, mode, q, wOver) {
+  const w = wOver || autoW(), A = D.AUTOPLAY, ev = cards.map((c) => cardValue(c, w)); let bi = 0; ev.forEach((e, i) => { if (e.v > ev[bi].v) bi = i; });
+  if (mode === 'level') {
+    if (ev[bi].v < A.rerollBelow && q.rerolls > 0) return { act: 'reroll', reason: `cartas fracas para o foco (melhor ${ev[bi].v.toFixed(2)}): re-rolando` };
+    const bad = ev.findIndex((e, i) => i !== bi && e.v < A.banishBelow && (cards[i].kind === 'move' || cards[i].kind === 'item') && !cards[i].up);
+    if (bad >= 0 && q.banishes > 0 && !q.netCards) return { act: 'banish', idx: bad, reason: `banindo ${cards[bad].kind === 'move' ? D.MOVES[cards[bad].id].stages[0][1] : D.ITEMS[cards[bad].id].name}: não serve ao foco` };
+    if (ev[bi].v < A.skipBelow && q.skips > 0) return { act: 'skip', reason: 'nada vale a pena: pulando (+ouro)' };
+  }
+  return { act: 'pick', idx: bi, reason: ev[bi].reason, v: ev[bi].v };
+}
+const AUTO = { t: 0, dec: null, chestT: 0 };
+function autoMark(dec) {
+  if (!SAVE.opts.autoShow) return;
+  if (dec.idx !== undefined) { const el = document.querySelector(`#cards .card[data-i="${dec.idx}"]`); if (el) el.classList.add(dec.act === 'banish' ? 'autoBan' : 'autoPick'); }
+  let el = $('autoWhy'); if (!el) { el = document.createElement('div'); el.id = 'autoWhy'; $('luBtns').parentNode.insertBefore(el, $('luBtns')); }
+  el.textContent = '🤖 ' + dec.reason; el.style.display = 'block';
+}
+function autoClear() { const el = $('autoWhy'); if (el) el.style.display = 'none'; AUTO.dec = null; AUTO.t = 0; }
+/* roda a cada quadro enquanto há cartas abertas; instant = sem esperar (simulação) */
+function autoStep(dt, instant) {
+  if (!autoOn()) return;
+  const net = NETUI.open && PLAYERS[0].netCards, wait = instant || !SAVE.opts.autoShow ? 0 : D.AUTOPLAY.decisionSec;
+  if (net) {
+    const C = PLAYERS[0].netCards; if (!AUTO.dec) { usePlayer(PLAYERS[0]); AUTO.dec = autoDecide(C.cards, C.mode, PLAYERS[0]); if (!instant) autoMark(AUTO.dec); }
+    AUTO.t += dt; if (AUTO.t < wait) return; const d = AUTO.dec; autoClear(); netPick(PLAYERS[0], d.idx || 0, d.act === 'pick' || d.act === 'banish' ? undefined : d.act); return;
+  }
+  if (state !== 'levelup') return;
+  const mode = LU.mode === 'altar' ? 'altar' : LU.mode === 'totem' ? 'totem' : LU.mode === 'mega' ? 'mega' : 'level';
+  if (!AUTO.dec) { AUTO.dec = autoDecide(LU.cards, mode, PL); if (!instant) autoMark(AUTO.dec); }
+  AUTO.t += dt; if (AUTO.t < wait) return;
+  const d = AUTO.dec; autoClear();
+  if (d.act === 'reroll') luAction('reroll'); else if (d.act === 'skip') luAction('skip');
+  else if (d.act === 'banish') { LU.banish = true; chooseCard(d.idx); } else chooseCard(d.idx);
+}
+function autoToggle() { SAVE.opts.autoBuild = SAVE.opts.autoBuild ? 0 : 1; persist(); AUTO.dec = null; toast(SAVE.opts.autoBuild ? '🤖 Auto-build ligado' : 'Auto-build desligado', SAVE.opts.autoBuild ? `Foco: ${autoPresetName()} (Y desliga)` : 'Você escolhe as cartas'); slotsDirty = true; }
+const autoPresetName = () => (D.AUTOPLAY.presets[SAVE.opts.autoPreset] || {}).name || 'Personalizado';
+function autoOptsHTML() {
+  const o = SAVE.opts, w = autoW(), P = D.AUTOPLAY.presets;
+  return `<div class="box autoBox"><div class="opt"><span>🤖 Andar sozinho</span><button class="btn ${o.autoWalk ? '' : 'gray'}" data-go="toggle" data-id="autoWalk">${o.autoWalk ? 'Ligado (T)' : 'Desligado (T)'}</button></div><div class="muted" style="margin-top:-4px">Joga a fase sozinho: foge da horda e dos ataques, carrega altares, compra baús, chama o chefe e sai pelo portal. Mexa no controle para assumir.</div>
+    <div class="opt"><span>🤖 Auto-build</span><button class="btn ${o.autoBuild ? '' : 'gray'}" data-go="toggle" data-id="autoBuild">${o.autoBuild ? 'Ligado (Y)' : 'Desligado (Y)'}</button></div>
+    <div class="opt"><span>Mostrar decisões</span><button class="btn ${o.autoShow ? '' : 'gray'}" data-go="toggle" data-id="autoShow">${o.autoShow ? 'Ligado' : 'Desligado'}</button></div>
+    <div class="muted" style="margin:6px 0 4px">Foco da build (atalhos):</div><div class="row" style="margin:0;gap:6px;flex-wrap:wrap">${Object.entries(P).map(([k, p]) => `<button class="btn ${o.autoPreset === k ? '' : 'gray'}" style="font-size:13px;padding:6px 10px" data-go="autoPreset" data-id="${k}">${esc(p.name)}</button>`).join('')}${o.autoPreset === 'personalizado' ? '<span class="chip">Personalizado</span>' : ''}</div>
+    ${AFOC.map((f) => `<div class="opt"><span>${D.AUTOPLAY.names[f]} <b data-awv="${f}">${w[f]}</b></span><input type="range" min="0" max="5" step="1" value="${w[f]}" data-aw="${f}"></div>`).join('')}
+    <div class="muted">XP = subir rápido • Quantidade = muitas magias na tela • Dano = matar rápido e derrubar chefes • Qualidade = magias supremas e cartas raras • Defesa = sobreviver</div></div>`;
+}
+
+/* ------------------------------------------------------------ PILOTO AUTOMÁTICO (anda sozinho e cumpre a fase)
+   Monta uma lista de ameaças em volta (horda, tiros, círculos de aviso dos chefes, ERR#404), testa 16 direções
+   e escolhe a que junta mais segurança com o objetivo do momento. Funciona no anfitrião e no convidado online. */
+function autoCtx(me) {
+  const host = state !== 'netview', T = [], R2 = 10 * 10; let cx = 0, cz = 0, cn = 0;
+  for (let k = 0; k < aliveN; k++) {
+    const i = aliveList[k]; if (host && E.boss[i] >= 0) continue; const dx = E.x[i] - me.x, dz = E.z[i] - me.z, d2 = dx * dx + dz * dz; if (d2 > R2) continue;
+    T.push([E.x[i], E.z[i], 1, 0]); if (d2 < 36) { cx += dx; cz += dz; cn++; }
+  }
+  const now = performance.now();
+  let hit = false; const shot = (x0, z0, vx, vz) => { // cada tiro em dois instantes à frente; se vai acertar em 0,2 s, esquiva
+    for (const [dt2, wt] of [[0.15, 4], [0.4, 3]]) { const x = x0 + vx * dt2, z = z0 + vz * dt2; if ((x - me.x) ** 2 + (z - me.z) ** 2 < 49) T.push([x, z, wt, 0]); }
+    const hx = x0 + vx * 0.2 - me.x, hz = z0 + vz * 0.2 - me.z; if (hx * hx + hz * hz < 0.8) hit = true; };
+  if (host) { for (const b of EB) if (b.on) shot(b.x, b.z, b.vx, b.vz); }
+  else { const pe = (now - NG.pt) / 1000; for (const b of NG.bul) shot(b.x + b.vx * pe, b.z + b.vz * pe, b.vx, b.vz); }
+  for (const f of FX) if (f.on && f.kind === 'warn') T.push([f.x, f.z, 6, (f.o.r1 || 2)]);
+  let reaper = null; const bosses = [];
+  if (host) { for (const b of BOSSES) if (b.alive) { const x = E.x[b.i], z = E.z[b.i]; if (b.def.invincible) reaper = [x, z]; else bosses.push([x, z]); T.push([x, z, b.def.invincible ? 14 : b.wind > 0 || b.charge > 0 ? 9 : 4, 0]); } }
+  else { for (const g of NG.bosses.values()) { const x = g.rx ?? g.x, z = g.rz ?? g.z; if (g.def.invincible) reaper = [x, z]; else bosses.push([x, z]); T.push([x, z, g.def.invincible ? 14 : g.w ? 9 : 4, 0]); } }
+  return { T, kite: cn >= 6 ? [cx / cn, cz / cn] : null, bosses, reaper, host, hit };
+}
+function autoDanger(x, z, T) {
+  let s = 0;
+  for (const t of T) { const dx = x - t[0], dz = z - t[1], d2 = dx * dx + dz * dz; if (t[3] > 0) { const r = t[3] + 0.8; if (d2 < r * r) s += t[2] * (1.6 - Math.sqrt(d2) / r); } else s += t[2] / (d2 + 0.6); }
+  return s;
+}
+/* o que fazer agora (alvo, quão forte puxa e se deve ficar parado dentro) */
+function autoGoal(me, ctx) {
+  const host = ctx.host, st = host ? RUN.stageT : NG.P ? NG.P.st : 0, swarm = host ? RUN.swarm : NG.P && NG.P.sw >= 0;
+  const coins = host ? RUN.coins : NG.P ? NG.P.c : 0, cost = host ? RUN.chestCost : NG.P ? NG.P.cc : 999, w = autoW();
+  const mates = host ? PLAYERS : NET.av, P = PORTAL, d = (o) => Math.hypot(o.x - me.x, o.z - me.z);
+  if (me.down) { let best = null, bd = 1e9; for (const q of mates) if (q !== me && !q.down) { const x = q.rx ?? q.x, z = q.rz ?? q.z, dd = Math.hypot(x - me.x, z - me.z); if (dd < bd) { bd = dd; best = { x, z }; } } return best ? { x: best.x, z: best.z, pull: 2.5, stay: 1.2 } : null; }
+  for (const q of mates) if (q !== me && q.down) { const x = q.rx ?? q.x, z = q.rz ?? q.z; if (Math.hypot(x - me.x, z - me.z) < 30) return { x, z, pull: 2.6, stay: 1.1 }; }
+  if (ctx.reaper && P && P.state !== 'exit') { return { x: me.x + (me.x - ctx.reaper[0]), z: me.z + (me.z - ctx.reaper[1]), pull: 3 }; }
+  if (P && P.state === 'exit') return { x: P.x, z: P.z, pull: 3, stay: 1.4 };
+  if (P && P.state === 'boss' && ctx.bosses.length) { // luta em círculo a ~8 do chefe
+    const b = ctx.bosses[0], a = Math.atan2(me.x - b[0], me.z - b[1]) + 0.5, R0 = hpFrac(me, host) < 0.5 ? 15 : RUN_STAGE(host) >= STG.count ? 13 : 10; return { x: b[0] + Math.sin(a) * R0, z: b[1] + Math.cos(a) * R0, pull: 2.2 };
+  }
+  const altars = SOBJ.filter((o) => o.kind === 'altar' && !o.done);
+  if (P && P.state === 'idle') {
+    let strong = false;
+    if (host) { // dano por segundo recente × 35 s contra a vida estimada do chefe
+      const id = stageBossId(), def = D.BOSSES[id]; const hp = def.hp * RUN.hpMult * BAL.bossHp * (STG.bossHp[RUN.stage - 1] || 1) * (1 + Math.min(PL.level, 60) * 0.01);
+      const last = RUN.stage >= STG.count, weak = def.types.some((t) => effectiveness(t, PL.types) > 1); // chefe forte contra o meu elemento: só bem mais forte
+      strong = (AUTO.dps || 0) * (last ? 6 : 12) * (weak ? 0.4 : 1) > hp && PL.level >= 8 + 10 * RUN.stage && PL.hp > S.maxHp * 0.7;
+    }
+    const lastSt = host ? RUN.stage >= STG.count : (NET.stage || 1) >= STG.count; // no chefe lendário, espera ficar mais forte
+    const late = swarm || st > STG.time - (lastSt ? 100 : 75) || (!altars.length && (strong || (!lastSt && st > STG.time - 150)));
+    if (late || (strong && altars.length <= 2 && st > 120)) return { x: P.x, z: P.z, pull: swarm ? 3 : 2.4, stay: 1.3 };
+  }
+  // objetivos da fase pelo caminho
+  const lv = host ? PL.level : me.lv || 1, hpOk = host ? PL.hp > S.maxHp * 0.7 : (me.hp || 0) > (me.mh || 1) * 0.7;
+  const strongEnough = (host ? (AUTO.dps || 0) > 450 * RUN.stage : st > 240) && lv >= 14 * RUN_STAGE(host) && hpOk;
+  let best = null, bs = 1e9;
+  const lock = me.apObj && !me.apObj.done && SOBJ.includes(me.apObj) ? me.apObj : null; // termina o objetivo escolhido
+  for (const o of SOBJ) {
+    if (o.done || o.kind === 'portal') continue; let k = 1, stay = 0;
+    if (o.kind === 'altar') { k = 0.55; stay = (o.r || 3) - 0.9; }
+    else if (o.kind === 'pot') k = 2.2;
+    else if (o.kind === 'chest') { if (coins < cost) continue; k = 0.9; }
+    else if (o.kind === 'shrine') {
+      stay = 1.3; if (o.id === 'totem' || o.id === 'succao') k = 0.9; else if (o.id === 'ganancia') { if (!((w.xp >= 4 && lv >= 6) || lv >= 10)) continue; k = 1.2; }
+      else if (o.id === 'desafio' || o.id === 'maldicao') {
+        if (!strongEnough || lv < 20 * RUN_STAGE(host)) continue;
+        if (host && o.id === 'desafio') { const L = RUN.map.bosses, bd = D.BOSSES[L[Math.min(STG.challengeBoss, L.length - 1)][1]]; if (bd.types.some((t) => effectiveness(t, PL.types) > 1)) continue; } // chefe forte contra mim: não
+        k = 1.4;
+      }
+    }
+    const sc = d(o) * k * (o === lock ? 0.4 : 1); if (sc < bs) { bs = sc; best = { x: o.x, z: o.z, pull: 2, stay, o }; }
+  }
+  me.apObj = best ? best.o : null;
+  // gemas e moedas perto valem o desvio
+  const picks = host ? PK : NG.picks; let pb = null, pd = 1e9;
+  for (const p of picks) { if (host && !p.on) continue; const dd = Math.hypot(p.x - me.x, p.z - me.z); if (dd < pd) { pd = dd; pb = p; } }
+  if (pb && (pd < 2.5 || !best)) return { x: pb.x, z: pb.z, pull: 1.6 };
+  if (best) return best;
+  if (P) return { x: P.x, z: P.z, pull: 1.2, stay: 6 }; // nada a fazer: fica perto do portal farmando
+  return null;
+}
+const RUN_STAGE = (host) => (host ? RUN.stage : NET.stage || 1);
+const hpFrac = (me, host) => (host ? me.hp / (me.S ? me.S.maxHp : S.maxHp) : (me.hp || 0) / (me.mh || 1));
+function autoPilot(me) {
+  const ctx = autoCtx(me), T = ctx.T, goal = autoGoal(me, ctx);
+  let gx = 0, gz = 0, gd = 0; if (goal) { gx = goal.x - me.x; gz = goal.z - me.z; gd = Math.hypot(gx, gz) || 1e-6; gx /= gd; gz /= gd; }
+  const fear = 1 + (1 - clamp(hpFrac(me, ctx.host), 0, 1)) * 1.6; // com pouca vida, foge mais
+  const here = autoDanger(me.x, me.z, T); let best = [0, 0], bs = -1e9;
+  for (let k = 0; k < 16; k++) {
+    const a = k / 16 * TAU, dx = Math.sin(a), dz = Math.cos(a);
+    let sc = -(autoDanger(me.x + dx * 1.3, me.z + dz * 1.3, T) + autoDanger(me.x + dx * 2.8, me.z + dz * 2.8, T) * 0.6) * fear;
+    if (goal) sc += (dx * gx + dz * gz) * (goal.pull || 2) * (gd < 1.5 ? 0.3 : 1);
+    if (obsPush(me.x + dx * 1.2, me.z + dz * 1.2, PL_RAD)) sc -= 1.2;
+    if (ctx.kite) { const kl = Math.hypot(ctx.kite[0], ctx.kite[1]) || 1; sc += Math.abs(dx * ctx.kite[1] - dz * ctx.kite[0]) / kl * 0.5; } // contornar a horda em vez de fugir reto
+    sc += (dx * (me.apx || 0) + dz * (me.apz || 0)) * 0.35; // não ficar tremendo entre direções
+    if (sc > bs) { bs = sc; best = [dx, dz]; }
+  }
+  let ix = best[0], iz = best[1];
+  if (goal && goal.stay && gd < goal.stay && here < 1.6) { ix = 0; iz = 0; } // fica dentro do altar/portal
+  me.apx = ix; me.apz = iz;
+  return { x: ix, z: iz, dash: (ctx.hit || here > (hpFrac(me, ctx.host) < 0.5 ? 3 : 4.2)) && !((me.dashCd || 0) > 0) };
+}
+const walkOn = () => !!SAVE.opts.autoWalk;
+function walkToggle() { SAVE.opts.autoWalk = SAVE.opts.autoWalk ? 0 : 1; persist(); toast(SAVE.opts.autoWalk ? '🤖 Andando sozinho' : 'Andar sozinho desligado', SAVE.opts.autoWalk ? 'Mexa no controle para assumir • T desliga' : 'Você controla o bicho'); }
+/* entrada final: o piloto assume quando o jogador não mexe por 2,5 s */
+function pilotInput(me, ix, iz, dash, dt) {
+  if (!walkOn()) return [ix, iz, dash];
+  if (Math.abs(ix) + Math.abs(iz) > 0.05 || dash) { me.manualT = 2.5; return [ix, iz, dash]; }
+  if ((me.manualT = (me.manualT || 0) - dt) > 0) return [ix, iz, dash];
+  const a = autoPilot(me); return [a.x, a.z, a.dash];
 }
 
 /* ------------------------------------------------------------ CO-OP: entrada na tela de vagas */
@@ -5380,7 +5651,7 @@ function debugKey(code) {
   else if (code === 'KeyY') dropPickup('mega', PL.x + 1.5, PL.z, 1);
   else if (code === 'KeyO') dropPickup(pick(['cristal_brasa', 'cristal_mare', 'cristal_faisca']), PL.x + 1.5, PL.z, 1);
   else if (code === 'KeyN') { const w = currentWave(); for (let k = 0; k < 500; k++) { const p = edgePoint(Math.random() * TAU, rr(2, 10)); spawnEnemy(wpick(w.pool), p[0], p[1]); } }
-  else if (code === 'KeyT') { RUN.time += 60; RUN.stageT += 60; banner('+1 minuto', fmtTime(RUN.time), 0.8); }
+  else if (code === 'KeyI') { RUN.time += 60; RUN.stageT += 60; banner('+1 minuto', fmtTime(RUN.time), 0.8); }
   else if (code === 'KeyL') addXp(PL.xpNext - PL.xp + 0.01);
   else if (code === 'KeyK') { for (let k = aliveN - 1; k >= 0; k--) { const i = aliveList[k]; if (E.boss[i] < 0) killEnemy(i); } }
   else if (code === 'KeyG') { DBG.god = !DBG.god; banner('Modo deus: ' + (DBG.god ? 'ON' : 'OFF'), '', 0.8); }
@@ -5406,7 +5677,7 @@ function sim(secs, mover, chooser) {
   const log = []; let t = 0; const dt = 1 / 30; const t0 = performance.now(); let frames = 0;
   while (t < secs && state !== 'over') {
     if (state === 'playing') { if (mover) mover(RUN.time); update(dt); t += dt; frames++; }
-    else if (state === 'levelup') { chooseCard(chooser ? chooser(LU.cards) : (Math.random() * LU.cards.length) | 0); }
+    else if (state === 'levelup') { if (chooser === 'AUTO') { const keep = SAVE.opts.autoBuild; SAVE.opts.autoBuild = 1; autoStep(0, true); SAVE.opts.autoBuild = keep; } else chooseCard(chooser ? chooser(LU.cards) : (Math.random() * LU.cards.length) | 0); }
     else if (state === 'chest') { finishChest(); log.push('baú: ' + $('chestPanel').innerText.replace(/\n+/g, ' | ')); closeChest(); }
     else if (state === 'evolving') { updateEvolution(dt); if (EVO && EVO.t < 0.05) log.push('evolução: ' + $('evoText').textContent); }
     else if (state === 'paused') togglePause();
@@ -5415,7 +5686,7 @@ function sim(secs, mover, chooser) {
   for (const n of NUMS) n.on = false; updateHUD(1); renderFrame();
   return { log, ms: Math.round(performance.now() - t0), msPorFrame: +((performance.now() - t0) / Math.max(1, frames)).toFixed(2), time: Math.round(RUN.time), lvl: PL.level, form: PL.formName, kills: RUN.kills, alive: aliveN, hp: Math.round(PL.hp), state, moves: PL.moves.map((m) => m.id + m.lvl).join(','), items: PL.items.map((x) => x.id + x.lvl).join(',') };
 }
-window.PS = { NET, get OBSN() { return OBS.size; }, obsTest(x, z, r) { obsAdd(x, z, r); }, faint(i) { const me = PL; usePlayer(PLAYERS[i]); playerFaint(true); usePlayer(me); }, D, E, get PL() { return PLAYERS[0]; }, get S() { return PLAYERS[0].S; }, PLAYERS, sim, KEYS, scene, camera, tick, getGeo, RAMP, ATLAS, outlineNormals, forceSize(v) { FORCE_SIZE = v; resize(); }, setManual(v) { manualTick = v; }, chooseCard, closeChest, get LU() { return LU; }, PK, get aliveList() { return aliveList.subarray(0, aliveN); }, get RUN() { return RUN; }, startRun, addXp, get state() { return state; }, get aliveN() { return aliveN; }, renderer, BOSSES, spawnBoss, spawnEnemy, dropPickup, get SAVE() { return SAVE; }, DBG, checkAchievements, MENU, buildMenu, togglePause, endRun, SOBJ, get PORTAL() { return PORTAL; }, nextStage, leaveStage, summonStageBoss };
+window.PS = { NET, autoDecide(mode) { return autoDecide(LU.cards, mode || 'level', PL); }, cardValue(c) { return cardValue(c, autoW()); }, get OBSN() { return OBS.size; }, obsTest(x, z, r) { obsAdd(x, z, r); }, faint(i) { const me = PL; usePlayer(PLAYERS[i]); playerFaint(true); usePlayer(me); }, D, E, get PL() { return PLAYERS[0]; }, get S() { return PLAYERS[0].S; }, PLAYERS, sim, KEYS, scene, camera, tick, getGeo, RAMP, ATLAS, outlineNormals, forceSize(v) { FORCE_SIZE = v; resize(); }, setManual(v) { manualTick = v; }, chooseCard, closeChest, get LU() { return LU; }, PK, get aliveList() { return aliveList.subarray(0, aliveN); }, get RUN() { return RUN; }, startRun, addXp, get state() { return state; }, get aliveN() { return aliveN; }, renderer, BOSSES, spawnBoss, spawnEnemy, dropPickup, get SAVE() { return SAVE; }, DBG, checkAchievements, MENU, buildMenu, togglePause, endRun, SOBJ, get PORTAL() { return PORTAL; }, nextStage, leaveStage, summonStageBoss };
 init();
 if (DEBUG && QS.has('bot')) { const sc = document.createElement('script'); sc.src = 'tools/bot.js?' + Date.now(); document.body.appendChild(sc); }
 })();
