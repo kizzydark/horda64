@@ -37,6 +37,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0f1430;color:var(--
 .slot.leg{border-color:var(--gold);box-shadow:0 0 10px var(--gold)}
 .slot b{position:absolute;right:-3px;bottom:-5px;font:900 10px Nunito;background:#000;border-radius:6px;padding:0 3px;color:#fff}
 #timerBox{display:flex;flex-direction:column;align-items:center;flex:1}
+#perf{display:none;position:fixed;left:8px;bottom:8px;z-index:60;background:rgba(4,6,20,.86);border:2px solid #000;border-radius:8px;padding:6px 8px;pointer-events:none}#perf canvas{display:block;width:240px;height:64px;background:rgba(255,255,255,.05)}#perf pre{margin:4px 0 0;font:700 11px/1.35 ui-monospace,Menlo,monospace;color:#e8ecff;white-space:pre}
 #autoTag{position:absolute;right:12px;top:58px;font:900 12px Nunito;color:#9ae8ff;text-shadow:0 2px 0 #000;display:none}
 #autoWhy{display:none;margin:12px auto 0;max-width:640px;text-align:center;font:900 15px Nunito;color:#9ae8ff;background:rgba(0,0,0,.35);border:2px solid rgba(154,232,255,.4);border-radius:10px;padding:6px 12px}
 .card.autoPick{box-shadow:0 12px 0 #000,0 0 0 4px #9ae8ff,0 0 30px rgba(154,232,255,.8);transform:translateY(-8px) scale(1.04)}
@@ -73,7 +74,7 @@ body.netguest #slots,body.netguest #hpBox,body.netguest #combo{display:none!impo
 #hpfill{height:100%;width:100%;background:linear-gradient(#7dff9a,#22b04a);transition:width .1s}
 #hptext{font:800 12px Nunito;text-shadow:0 2px 0 #000;color:#e0ffe8}
 /* ---------- Modais */
-.modal{align-items:center;justify-content:center;background:rgba(8,10,30,.55);backdrop-filter:blur(2px);z-index:20}
+.modal{align-items:center;justify-content:center;background:rgba(8,10,30,.62);z-index:20}
 .panel{background:var(--panel);border:4px solid #000;border-radius:20px;box-shadow:0 10px 0 #000;padding:18px 20px;max-width:min(980px,96vw);max-height:94vh;overflow:auto}
 .panel h2{font:30px Bungee,Impact;text-align:center;color:var(--yellow);margin-bottom:12px}
 #cards{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
@@ -173,10 +174,10 @@ input[type=range]{width:100%}
 #toasts{position:fixed;right:10px;top:70px;z-index:40;display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .toast{background:#fff;color:#111;border:4px solid #000;border-radius:12px;padding:8px 12px;font:900 14px Nunito;box-shadow:0 5px 0 #000;animation:pop .3s both;max-width:300px}
 .toast small{display:block;font-weight:800;color:#4a4f80}
-body.glitch #gl{animation:glt .35s steps(2) infinite}
-@keyframes glt{0%{filter:hue-rotate(0) contrast(1)}50%{filter:hue-rotate(160deg) contrast(1.6) saturate(2)}100%{filter:hue-rotate(300deg) invert(.1)}}
-#glitch{position:fixed;inset:0;pointer-events:none;z-index:4;display:none;background:repeating-linear-gradient(0deg,rgba(255,0,255,.08) 0 2px,rgba(0,0,0,0) 2px 5px)}
-body.glitch #glitch{display:block}
+/* ERR#404: o efeito fica no shader final (GLITCH_GLSL); sem shader (Leve) só uma camada piscando, que o navegador compõe de graça */
+#glitch{position:fixed;inset:0;pointer-events:none;z-index:4;display:none;background:repeating-linear-gradient(0deg,rgba(255,0,255,.1) 0 2px,rgba(0,0,0,0) 2px 5px)}
+body.glitch.noshader #glitch{display:block;animation:glt .35s steps(2) infinite}
+@keyframes glt{0%{background-color:rgba(0,0,0,0)}50%{background-color:rgba(120,0,160,.18)}100%{background-color:rgba(0,0,0,0)}}
 @media (max-width:700px){#menu{background:rgba(6,9,30,.82)} .card{width:44vw;min-height:200px} .card .ic{font-size:34px} #hpBox{min-width:0} .hpb{width:150px}}
 #combo{font:30px Bungee,Impact;color:#ffd84a;text-shadow:-3px -3px 0 #000,3px -3px 0 #000,-3px 3px 0 #000,3px 3px 0 #000,0 4px 0 #000;margin-top:2px;opacity:0;transition:opacity .2s;pointer-events:none;line-height:1}
 #combo.on{opacity:1}
@@ -193,7 +194,7 @@ body.glitch #glitch{display:block}
 @keyframes shine{to{background-position:300% 0}}
 #dbg{position:fixed;right:8px;bottom:8px;z-index:30;font:800 11px monospace;color:#9f9;background:#000a;padding:4px 6px;border-radius:6px;pointer-events:none;white-space:pre}
 /* ---------- POP-UPS (estilo console: vidro escuro, borda dourada, entrada animada) */
-.modal{background:radial-gradient(ellipse at center,rgba(10,14,46,.45),rgba(3,4,16,.82));backdrop-filter:blur(3px)}
+.modal{background:radial-gradient(ellipse at center,rgba(10,14,46,.55),rgba(3,4,16,.86))}
 .panel{background:linear-gradient(180deg,rgba(30,38,104,.97),rgba(12,16,52,.97));border:3px solid #000;border-radius:18px;box-shadow:0 0 0 2px rgba(255,216,74,.35) inset,0 12px 0 #000,0 0 40px rgba(0,0,0,.55);position:relative}
 .layer.on .panel{animation:panelIn .32s cubic-bezier(.2,1.3,.4,1) both}
 @keyframes panelIn{from{transform:translateY(26px) scale(.92);opacity:0}to{transform:none;opacity:1}}
@@ -1239,6 +1240,31 @@ const BALANCE = {
   coinChance: 0.022, berryChance: 0.0035, specialChance: 0.0009, shinyChance: 0.004, shinyCooldown: 75, // bicho dourado dá baú; no máx. 1 a cada 75s
 };
 
+/* ------------------------------------------------------------ DESEMPENHO (meta: 120 fps no fim da partida)
+   Ajuste aqui sem mexer no motor. A qualidade adaptativa só age com Opções → Prioridade: fps (o padrão). */
+const PERFORMANCE = {
+  champAt: 1100,        // inimigos vivos a partir daqui: quem nasceria vira "campeão" (um inimigo fora da tela cresce e soma a vida e o XP)
+  champMaxScale: 2.3,   // tamanho máximo do campeão
+  mergeAt: 500,         // coletáveis no chão a partir daqui: gemas e moedas paradas e próximas se fundem numa só
+  mergeCell: 2.6,       // distância (m) para fundir
+  mergeAge: 3,          // só funde o que está no chão há pelo menos isso (s)
+  particlesPerFrame: 450, // partículas novas por quadro, no máximo
+  numMergeSec: 0.3,     // números de dano no mesmo inimigo dentro desse tempo somam num só
+  adaptive: {
+    // nível 0 = visual cheio; cada nível corta um pouco mais quando os quadros começam a atrasar
+    levels: [
+      { name: 'cheia', res: 1, pt: 1 },
+      { name: 'alta', res: 0.85, pt: 0.75 },
+      { name: 'média', res: 0.72, pt: 0.55, noOutline: true },
+      { name: 'baixa', res: 0.6, pt: 0.4, noOutline: true, noBloom: true, noShadows: true },
+    ],
+    dropMiss: 4,     // quadros perdidos em 1 s para baixar um nível
+    raiseAfter: 6,   // segundos sem perder quadro (e com folga) para subir um nível
+    slack: 0.5,      // folga: só sobe se o quadro gastou menos que isso do tempo disponível
+    lockAfterFail: 30, // se subiu e voltou a perder quadro logo, espera isso antes de tentar de novo
+  },
+};
+
 /* ------------------------------------------------------------ TEXTOS/MEMES */
 const TEXTS = {
   super: ['FRAQUEZA!', 'NO PONTO FRACO!!', 'ARRASOU!!!', 'FRAQUEZA!!!'],
@@ -1257,7 +1283,7 @@ const TEXTS = {
   splash: ['O Carpinútil pulou...', '...e nada aconteceu.'],
 };
 
-window.GAME_DATA = { AUTOPLAY, MOVEMENT, BALANCE, TYPES, CHART, PLAYERS, MOVES, ITEMS, ENEMIES, BOSSES, MAPS, SHOP, ACHIEVEMENTS, TEXTS, STAGES, ALTAR_BOOSTS, SHRINES, COOP };
+window.GAME_DATA = { PERFORMANCE, AUTOPLAY, MOVEMENT, BALANCE, TYPES, CHART, PLAYERS, MOVES, ITEMS, ENEMIES, BOSSES, MAPS, SHOP, ACHIEVEMENTS, TEXTS, STAGES, ALTAR_BOOSTS, SHRINES, COOP };
 })();
 
 </script>
@@ -1831,7 +1857,7 @@ window.GAME_MODELS = MODELS;
 (function () {
 'use strict';
 const D = window.GAME_DATA, MD = window.GAME_MODELS;
-const BAL = D.BALANCE;
+const BAL = D.BALANCE, PF = D.PERFORMANCE;
 const QS = new URLSearchParams(location.search);
 const DEBUG = QS.has('debug');
 const DEG = Math.PI / 180, TAU = Math.PI * 2;
@@ -2018,14 +2044,26 @@ function computeViewBounds(zm) {
 }
 /* pós-processamento: bloom só no que passa do branco (magias, flashes, cristais) */
 let composer = null, bloomPass = null;
+/* ERR#404 caçando: faixas deslocadas, matiz girando em degraus, contraste e linhas magenta (antes era filtro CSS no canvas inteiro) */
+const GLITCH_GLSL = `uniform float uGlitch; uniform float uGT;
+    vec3 hueRot(vec3 c, float a) { const vec3 k = vec3(0.57735); float ca = cos(a); return c * ca + cross(k, c) * sin(a) + k * dot(k, c) * (1.0 - ca); }
+    vec3 glitchFx(sampler2D t, vec2 uv, vec3 c) {
+      if (uGlitch < 0.5) return c;
+      float st = floor(uGT / 0.175), band = floor(uv.y * 26.0), j = fract(sin(band * 12.9898 + st * 78.233) * 43758.5453);
+      if (j > 0.88) c = texture2D(t, vec2(fract(uv.x + (j - 0.94) * 0.12), uv.y)).rgb;
+      if (mod(st, 2.0) > 0.5) { c = hueRot(c, 2.79); c = (c - 0.5) * 1.6 + 0.5; float l = dot(c, vec3(0.299, 0.587, 0.114)); c = clamp(mix(vec3(l), c, 2.0), 0.0, 1.0); }
+      if (mod(gl_FragCoord.y, 5.0) < 2.0) c = mix(c, vec3(1.0, 0.0, 1.0), 0.08);
+      return c;
+    }`;
 const RETRO_SHADER = {
-  uniforms: { tDiffuse: { value: null }, uMode: { value: 0 } },
+  uniforms: { tDiffuse: { value: null }, uMode: { value: 0 }, uGlitch: { value: 0 }, uGT: { value: 0 } },
   vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
   fragmentShader: `uniform sampler2D tDiffuse; uniform float uMode; varying vec2 vUv;
+    ${GLITCH_GLSL}
     float b2(vec2 a) { a = floor(a); return fract(a.x / 2.0 + a.y * a.y * 0.75); }
     float bayer(vec2 a) { return b2(0.5 * a) * 0.25 + b2(a); }      /* pontilhado ordenado 4x4 */
     void main() {
-      vec3 c = texture2D(tDiffuse, vUv).rgb;
+      vec3 c = glitchFx(tDiffuse, vUv, texture2D(tDiffuse, vUv).rgb);
       if (uMode < 0.5) {                            /* 64: cor de 15 bits com pontilhado de ruído */
         float d = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
         c = floor(c * 31.0 + d) / 31.0 * 1.03 + 0.01;
@@ -2042,10 +2080,18 @@ const RETRO_SHADER = {
       gl_FragColor = vec4(c, 1.0);
     }`,
 };
+const GLITCH_SHADER = { uniforms: { tDiffuse: { value: null }, uGlitch: { value: 0 }, uGT: { value: 0 } }, vertexShader: RETRO_SHADER.vertexShader,
+  fragmentShader: `uniform sampler2D tDiffuse; varying vec2 vUv; ${GLITCH_GLSL}
+    void main() { vec4 t = texture2D(tDiffuse, vUv); gl_FragColor = vec4(glitchFx(tDiffuse, vUv, t.rgb), t.a); }` };
+let glitchPass = null; // o passo que desenha o ERR#404 (no Moderno só fica ligado enquanto ele caça)
+function setGlitch(on) {
+  document.body.classList.toggle('glitch', on); document.body.classList.toggle('noshader', !glitchPass);
+  if (glitchPass) { glitchPass.uniforms.uGlitch.value = on ? 1 : 0; if (glitchPass.material.fragmentShader === GLITCH_SHADER.fragmentShader) glitchPass.enabled = on; }
+}
 function setupComposer() {
   if (GS.res && THREE.EffectComposer && THREE.ShaderPass && THREE.RenderPass) {
     composer = new THREE.EffectComposer(renderer); composer.addPass(new THREE.RenderPass(scene, camera));
-    const pass = new THREE.ShaderPass(RETRO_SHADER); pass.uniforms.uMode.value = GS.pass || 0; composer.addPass(pass); return;
+    const pass = new THREE.ShaderPass(RETRO_SHADER); pass.uniforms.uMode.value = GS.pass || 0; composer.addPass(pass); glitchPass = pass; return;
   }
   if (!GS.bloom || !THREE.EffectComposer || !THREE.UnrealBloomPass || !THREE.RenderPass) return;
   const RT = renderer.capabilities.isWebGL2 && THREE.WebGLMultisampleRenderTarget ? THREE.WebGLMultisampleRenderTarget : THREE.WebGLRenderTarget;
@@ -2054,13 +2100,16 @@ function setupComposer() {
   composer.addPass(new THREE.RenderPass(scene, camera));
   bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(256, 256), 0.75, 0.5, 1.12);
   composer.addPass(bloomPass);
+  if (THREE.ShaderPass) { glitchPass = new THREE.ShaderPass(GLITCH_SHADER); glitchPass.enabled = false; composer.addPass(glitchPass); }
 }
 function renderFrame() { if (composer) composer.render(); else renderer.render(scene, camera); }
 let FORCE_SIZE = null; // debug/gravação: resolução fixa independente da janela
 function resize() {
   W = Math.max(1, FORCE_SIZE ? FORCE_SIZE[0] : window.innerWidth); H = Math.max(1, FORCE_SIZE ? FORCE_SIZE[1] : window.innerHeight);
+  const qr = typeof QA === 'object' ? QA.res : 1; // qualidade adaptativa: baixa a resolução interna aos poucos
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, GFX.high ? 1.6 : 1.4) * qr);
   renderer.setSize(W, H, !FORCE_SIZE); camera.aspect = W / H; camera.updateProjectionMatrix();
-  if (GS.res) { renderer.setPixelRatio(clamp(GS.res / W, 0.2, Math.min(window.devicePixelRatio || 1, 1.2))); renderer.setSize(W, H, !FORCE_SIZE); }
+  if (GS.res) { renderer.setPixelRatio(clamp(GS.res / W, 0.2, Math.min(window.devicePixelRatio || 1, 1.2)) * qr); renderer.setSize(W, H, !FORCE_SIZE); }
   if (composer) { composer.setPixelRatio && composer.setPixelRatio(renderer.getPixelRatio()); composer.setSize(W, H); if (bloomPass) bloomPass.setSize(W * 0.5, H * 0.5); }
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   fxc.width = W * dpr; fxc.height = H * dpr; if (!FORCE_SIZE) { fxc.style.width = W + 'px'; fxc.style.height = H + 'px'; }
@@ -2467,7 +2516,8 @@ const PLAYERS = [PL];
 const VIEW = { x: 0, z: 0 }, GRIDC = { x: 0, z: 0 };
 function usePlayer(p) { if (PL === p) return; PL = p; S = p.S; B = p.B || B; CH = p.CH || CH; }
 const isCoop = () => PLAYERS.length > 1;
-const alivePlayers = () => PLAYERS.filter((p) => !p.down);
+const ALIVEP = []; // reaproveitada: nada de array novo por quadro (quem chama só lê no mesmo quadro)
+const alivePlayers = () => { ALIVEP.length = 0; for (const p of PLAYERS) if (!p.down) ALIVEP.push(p); return ALIVEP; };
 function nearestPlayer(x, z) { let best = null, bd = 1e18; for (const p of PLAYERS) { if (p.down) continue; const dx = p.x - x, dz = p.z - z, d = dx * dx + dz * dz; if (d < bd) { bd = d; best = p; } } return best || PLAYERS[0]; }
 const PL_RAD = 0.45;
 
@@ -2479,7 +2529,7 @@ const E = {
   spd: new Float32Array(MAXE), dmg: new Float32Array(MAXE), xp: new Float32Array(MAXE), rad: new Float32Array(MAXE),
   flash: new Float32Array(MAXE), slow: new Float32Array(MAXE), freeze: new Float32Array(MAXE), rot: new Float32Array(MAXE),
   phase: new Float32Array(MAXE), life: new Float32Array(MAXE), dx: new Float32Array(MAXE), dz: new Float32Array(MAXE),
-  beh: new Uint8Array(MAXE), shiny: new Uint8Array(MAXE), boss: new Int16Array(MAXE), ev: new Uint8Array(MAXE), knockRes: new Float32Array(MAXE),
+  beh: new Uint8Array(MAXE), shiny: new Uint8Array(MAXE), big: new Float32Array(MAXE), merged: new Uint16Array(MAXE), boss: new Int16Array(MAXE), ev: new Uint8Array(MAXE), knockRes: new Float32Array(MAXE),
   defs: new Array(MAXE), sp: new Array(MAXE),
 };
 const BEH = { chase: 0, swarm: 1, flop: 2, erratic: 3, ghost: 4, ring: 5, boss: 6, reaper: 7 };
@@ -2509,7 +2559,7 @@ function allocEnemy(def, x, z, o) {
   const i = freeList.pop();
   E.alive[i] = 1; E.x[i] = x; E.z[i] = z; E.y[i] = o.y || 0; E.vy[i] = 0; E.kx[i] = 0; E.kz[i] = 0;
   E.flash[i] = 0; E.slow[i] = 0; E.freeze[i] = 0; E.rot[i] = Math.atan2(PL.x - x, PL.z - z); E.phase[i] = Math.random() * TAU;
-  E.life[i] = o.life || 0; E.dx[i] = o.dx || 0; E.dz[i] = o.dz || 0; E.shiny[i] = 0; E.boss[i] = -1; E.ev[i] = o.ev ? 1 : 0;
+  E.life[i] = o.life || 0; E.dx[i] = o.dx || 0; E.dz[i] = o.dz || 0; E.shiny[i] = 0; E.boss[i] = -1; E.ev[i] = o.ev ? 1 : 0; E.big[i] = 1; E.merged[i] = 0;
   E.defs[i] = def; E.knockRes[i] = def.knockRes || 1;
   listPos[i] = aliveN; aliveList[aliveN++] = i;
   for (const q of PLAYERS) for (const m of q.moves) if (m.hcd) m.hcd[i] = 0;
@@ -2528,6 +2578,17 @@ function spawnEnemy(id, x, z, o) {
   E.sp[i] = species(id);
   dexSee(def.species || id);
   return i;
+}
+/* horda gigante: em vez de mais um inimigo, um comum fora da tela cresce e ganha a vida e o XP de quem nasceria */
+function champion() {
+  for (let t = 0; t < 16; t++) { // prefere quem está fora da tela; no Enxame quase todos estão perto, então aceita qualquer um
+    const i = aliveList[(Math.random() * aliveN) | 0];
+    if (E.boss[i] >= 0 || E.ev[i] || E.shiny[i] || E.big[i] >= PF.champMaxScale || (t < 8 && onScreen(i, -3))) continue;
+    const def = E.defs[i], hp = def.hp * RUN.hpMult * BAL.enemyHp; E.hp[i] += hp; E.maxHp[i] += hp; E.xp[i] += def.xp; E.merged[i]++;
+    E.big[i] = Math.min(PF.champMaxScale, 1 + 0.32 * Math.sqrt(E.merged[i])); E.rad[i] = (def.radius || def.scale * 0.5) * Math.sqrt(E.big[i]);
+    E.dmg[i] = def.dmg * RUN.dmgMult * (1 + Math.min(1, E.merged[i] * 0.04)); return true;
+  }
+  return false;
 }
 function removeEnemy(i) {
   if (!E.alive[i]) return;
@@ -2636,8 +2697,13 @@ const MAXPT = 2600;
 const PT = { x: new Float32Array(MAXPT), y: new Float32Array(MAXPT), z: new Float32Array(MAXPT), vx: new Float32Array(MAXPT), vy: new Float32Array(MAXPT), vz: new Float32Array(MAXPT),
   life: new Float32Array(MAXPT), max: new Float32Array(MAXPT), size: new Float32Array(MAXPT), r: new Float32Array(MAXPT), g: new Float32Array(MAXPT), b: new Float32Array(MAXPT), grav: new Float32Array(MAXPT) };
 let ptCursor = 0, PTMESH = null;
+const PCOL = new Map(), PTC = new THREE.Color(); // cores já convertidas (sem new THREE.Color por explosão)
+let ptBudget = 9999; // quantas partículas ainda cabem neste quadro (a qualidade adaptativa corta)
 function particles(x, y, z, color, n, speed, size, life, grav) {
-  const c = (color instanceof THREE.Color ? color.clone() : new THREE.Color(color)).multiplyScalar(GFX.high ? 1.35 : 1);
+  if (ptBudget <= 0) return; n = Math.min(n, ptBudget); ptBudget -= n;
+  let c; const kb = GFX.high ? 1.35 : 1;
+  if (color instanceof THREE.Color) c = PTC.copy(color).multiplyScalar(kb);
+  else { c = PCOL.get(color); if (!c) { c = new THREE.Color(color).multiplyScalar(kb); PCOL.set(color, c); } }
   for (let k = 0; k < n; k++) {
     const i = ptCursor = (ptCursor + 1) % MAXPT;
     const a = Math.random() * TAU, e = rr(-0.3, 1), s = speed * rr(0.4, 1);
@@ -2725,8 +2791,9 @@ function dropPickup(kind, x, z, val) {
   return p;
 }
 const TMPC = new THREE.Color();
+const PKCNT = {};
 function updatePickups(dt) {
-  const cnt = {}; for (const k of PK_KINDS) { cnt[k] = 0; PKCOUNT[k] = 0; }
+  const cnt = PKCNT; for (const k of PK_KINDS) { cnt[k] = 0; PKCOUNT[k] = 0; }
   const solo = !isCoop(), P0 = PLAYERS[0];
   for (const p of PK) {
     if (!p.on) continue; p.t += dt;
@@ -2750,9 +2817,21 @@ function updatePickups(dt) {
     a[o + 12] = p.x; a[o + 13] = 0.45 + Math.sin(p.t * 4 + p.z) * 0.12 * big + (p.t < 0.35 ? Math.sin(p.t / 0.35 * Math.PI) * 0.9 : 0); a[o + 14] = p.z; a[o + 15] = 1;
     if (p.kind === 'gema') { candyColor(p.val, TMPC); const ca = mesh.instanceColor.array; ca[j * 3] = TMPC.r; ca[j * 3 + 1] = TMPC.g; ca[j * 3 + 2] = TMPC.b; }
   }
+  { let tot = 0; for (const k of PK_KINDS) tot += cnt[k]; mergePickups(dt, tot); }
   for (const k of PK_KINDS) { const m = PKMESH[k]; m.count = Math.min(cnt[k], m.userData.cap); if (m.userData.ol) m.userData.ol.count = m.count; m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; }
 }
 function clearPickups() { for (const p of PK) p.on = false; }
+/* muitos coletáveis no chão: gemas e moedas paradas há um tempo e próximas viram uma só (o valor soma; a gema muda de cor) */
+const MERGE = new Map(); let mergeT = 0;
+function mergePickups(dt, total) {
+  mergeT -= dt; if (mergeT > 0 || total < PF.mergeAt) return; mergeT = 0.5;
+  MERGE.clear(); const cs = PF.mergeCell;
+  for (const p of PK) {
+    if (!p.on || p.mag || p.t < PF.mergeAge || (p.kind !== 'gema' && p.kind !== 'coin')) continue;
+    const key = (Math.floor(p.x / cs) + 4096) * 8192 + Math.floor(p.z / cs) + 4096 + (p.kind === 'coin' ? 0.5 : 0);
+    const q = MERGE.get(key); if (q) { q.val += p.val; p.on = false; } else MERGE.set(key, p);
+  }
+}
 
 /* ------------------------------------------------------------ TEXTO FLUTUANTE (canvas 2D) */
 const NUMS = []; for (let i = 0; i < 140; i++) NUMS.push({ on: false });
@@ -2760,8 +2839,10 @@ let numCursor = 0;
 function floatText(x, y, z, txt, color, size, life, delay) {
   if (NET.role === 'host') netEv(['t', +x.toFixed(1), +y.toFixed(1), +z.toFixed(1), txt, color || '#fff', size || 15, life || 0.7], x, z);
   numCursor = (numCursor + 1) % NUMS.length; const n = NUMS[numCursor];
-  n.on = true; n.x = x; n.y = y; n.z = z; n.txt = txt; n.color = color || '#fff'; n.size = size || 15; n.t = -(delay || 0); n.life = life || 0.7; n.vx = rr(-0.6, 0.6);
+  n.on = true; n.x = x; n.y = y; n.z = z; n.txt = txt; n.color = color || '#fff'; n.size = size || 15; n.t = -(delay || 0); n.life = life || 0.7; n.vx = rr(-0.6, 0.6); n.ei = -1;
+  return numCursor;
 }
+const NUMLAST = new Int16Array(MAXE).fill(-1); // último número de dano de cada inimigo (para somar golpes seguidos)
 const effT = { super: 0, weak: 0, immune: 0, splash: 0 };
 function effText(i, eff) {
   const key = eff === 0 ? 'immune' : eff > 1 ? 'super' : 'weak'; if (effT[key] > 0) return;
@@ -2776,6 +2857,7 @@ function drawTouch() {
   g2.save(); g2.globalAlpha = 0.55; g2.lineWidth = 4; g2.strokeStyle = '#fff'; g2.beginPath(); g2.arc(TOUCH.sx, TOUCH.sy, 55, 0, TAU); g2.stroke();
   g2.globalAlpha = 0.8; g2.fillStyle = '#ffd84a'; g2.beginPath(); g2.arc(TOUCH.sx + dx, TOUCH.sy + dz, 24, 0, TAU); g2.fill(); g2.restore();
 }
+const NUMFONT = []; function numFont(px) { return NUMFONT[px] || (NUMFONT[px] = `900 ${px}px Nunito, sans-serif`); }
 function drawNums(dt) {
   g2.textAlign = 'center'; g2.lineJoin = 'round';
   for (const n of NUMS) {
@@ -2784,7 +2866,7 @@ function drawNums(dt) {
     const sx = (V3.x * 0.5 + 0.5) * W, sy = (-V3.y * 0.5 + 0.5) * H; const k = n.t / n.life;
     const sc = n.t < 0.08 ? 1 + (0.08 - n.t) * 6 : 1;
     g2.globalAlpha = k > 0.7 ? (1 - k) / 0.3 : 1;
-    g2.font = `900 ${Math.round(n.size * sc)}px Nunito, sans-serif`; g2.lineWidth = Math.max(3, n.size / 5); g2.strokeStyle = '#000';
+    g2.font = numFont(Math.round(n.size * sc)); g2.lineWidth = Math.max(3, n.size / 5); g2.strokeStyle = '#000';
     g2.strokeText(n.txt, sx, sy); g2.fillStyle = n.color; g2.fillText(n.txt, sx, sy);
   }
   g2.globalAlpha = 1;
@@ -3212,8 +3294,10 @@ function damageEnemy(i, dmg, type, kx, kz, knock, slow, freeze, fixed) {
   if (eff > 1) RUN.superEff++;
   if (eff !== 1) effText(i, eff);
   if (SAVE.opts.numbers && (numTokens >= 1 || crit || isBoss)) {
-    numTokens -= 1; const y = 1.0 + E.y[i] + (def.fly || 0) + (isBoss ? def.scale * 0.6 : 0);
-    floatText(E.x[i] + rr(-0.3, 0.3), y, E.z[i], fmtN(Math.round(out)), crit ? '#ffe040' : eff > 1 ? '#ffa040' : eff < 1 ? '#a0a8c0' : '#ffffff', crit ? 19 : eff > 1 ? 17 : 14, 0.6);
+    const ln = NUMLAST[i], nn = ln >= 0 ? NUMS[ln] : null;
+    if (nn && nn.on && nn.ei === i && nn.t < PF.numMergeSec) { nn.val += out; nn.txt = fmtN(Math.round(nn.val)); if (crit) { nn.color = '#ffe040'; nn.size = 19; } }
+    else { numTokens -= 1; const y = 1.0 + E.y[i] + (def.fly || 0) + (isBoss ? def.scale * 0.6 : 0);
+    NUMLAST[i] = floatText(E.x[i] + rr(-0.3, 0.3), y, E.z[i], fmtN(Math.round(out)), crit ? '#ffe040' : eff > 1 ? '#ffa040' : eff < 1 ? '#a0a8c0' : '#ffffff', crit ? 19 : eff > 1 ? 17 : 14, 0.6); NUMS[NUMLAST[i]].ei = i; NUMS[NUMLAST[i]].val = out; }
   }
   sfx('hit', 0.05);
   if (E.hp[i] <= 0) killEnemy(i);
@@ -3460,7 +3544,7 @@ function renderEnemies() {
     sm[o + 12] = sx; sm[o + 13] = 0.03; sm[o + 14] = sz; sm[o + 15] = 1; sh++;
     if (E.boss[i] >= 0) continue;
     const s = E.sp[i]; const j = s.cnt++; const a = s.mesh.instanceMatrix.array; o = j * 16;
-    const bob = Math.sin(t * 10 + E.phase[i]); const sc = def.scale * (E.shiny[i] === 2 ? 1.75 : E.shiny[i] ? 1.2 : 1) * (E.flash[i] > 0 ? 1 + E.flash[i] * 1.6 : 1);
+    const bob = Math.sin(t * 10 + E.phase[i]); const sc = def.scale * E.big[i] * (E.shiny[i] === 2 ? 1.75 : E.shiny[i] ? 1.2 : 1) * (E.flash[i] > 0 ? 1 + E.flash[i] * 1.6 : 1);
     const sy = sc * (1 + bob * 0.07), sxz = sc * (1 - bob * 0.03);
     const c = Math.cos(E.rot[i]), sn = Math.sin(E.rot[i]);
     a[o] = c * sxz; a[o + 1] = 0; a[o + 2] = -sn * sxz; a[o + 3] = 0; a[o + 4] = 0; a[o + 5] = sy; a[o + 6] = 0; a[o + 7] = 0; a[o + 8] = sn * sxz; a[o + 9] = 0; a[o + 10] = c * sxz; a[o + 11] = 0;
@@ -3469,8 +3553,8 @@ function renderEnemies() {
     if (E.flash[i] > 0) { r = g = b = 2.6; } else if (E.freeze[i] > 0) { r = 0.6; g = 0.9; b = 1.9; } else if (E.slow[i] > 0) { r = 0.75; g = 0.85; b = 1.4; } else if (E.shiny[i] === 2) { r = 1.6; g = 0.75; b = 0.45; } else if (E.shiny[i]) { r = 1.6; g = 1.35; b = 0.45; }
     ca[q] = r; ca[q + 1] = g; ca[q + 2] = b;
   }
-  SHADOW.count = sh; SHADOW.instanceMatrix.needsUpdate = true; if (RUN) RUN.eventAlive = evN + BOSSES.filter((b) => b.alive).length;
-  for (const s of SPECIES_LIST) { s.mesh.count = s.cnt; s.mesh.visible = s.cnt > 0; if (s.ol) { s.ol.count = s.cnt; s.ol.visible = s.cnt > 0; } if (s.cnt) { s.mesh.instanceMatrix.needsUpdate = true; s.mesh.instanceColor.needsUpdate = true; } }
+  SHADOW.count = sh; SHADOW.instanceMatrix.needsUpdate = true; if (RUN) { let nb = 0; for (const b of BOSSES) if (b.alive) nb++; RUN.eventAlive = evN + nb; }
+  for (const s of SPECIES_LIST) { s.mesh.count = s.cnt; s.mesh.visible = s.cnt > 0; if (s.ol) { s.ol.count = s.cnt; s.ol.visible = s.cnt > 0 && !s.ol.userData.qaOff; } if (s.cnt) { s.mesh.instanceMatrix.needsUpdate = true; s.mesh.instanceColor.needsUpdate = true; } }
 }
 
 /* ------------------------------------------------------------ HORDAS */
@@ -3479,7 +3563,8 @@ function updateSpawning(dt) {
   const w = currentWave(); const cap = 1900; const sw = (RUN.swarm ? STG.swarm.rate + RUN.swarmT / STG.swarm.ramp : 1) * (1 + COOP.spawnPerPlayer * (PLAYERS.length - 1));
   RUN.spawnAcc += w.rate * sw * dt;
   let guard = 0;
-  while (RUN.spawnAcc >= 1 && aliveN < cap && guard++ < 40) { RUN.spawnAcc -= 1; const p = spawnPoint(rr(2, 6)); spawnEnemy(wpick(w.pool), p[0], p[1]); }
+  const champAt = PF.champAt * QA.champ;
+  while (RUN.spawnAcc >= 1 && aliveN < cap && guard++ < 40) { RUN.spawnAcc -= 1; if (aliveN >= champAt && champion()) continue; const p = spawnPoint(rr(2, 6)); spawnEnemy(wpick(w.pool), p[0], p[1]); }
   if (RUN.spawnAcc > 5) RUN.spawnAcc = 5;
   const regular = aliveN - RUN.eventAlive;
   const wmin = (RUN.swarm ? w.min * 1.5 : w.min) * (1 + COOP.spawnPerPlayer * (PLAYERS.length - 1));
@@ -4004,23 +4089,25 @@ function musicDuck(on) { if (AU.music) AU.music.gain.value = on ? SAVE.opts.musi
 
 /* ------------------------------------------------------------ HUD */
 let slotsDirty = true, hudT = 0;
+function setTxt(id, v) { const el = $(id); if (el._v !== v) { el._v = v; el.textContent = v; } }
+function setW(id, pct) { const el = $(id), v = Math.round(pct * 2) / 2; if (el._w !== v) { el._w = v; el.style.width = v + '%'; } }
 function updateHUD(dt) {
   const cb = $('combo');
   if (RUN.combo >= 8) { cb.classList.add('on'); if (RUN.comboBump) { RUN.comboBump = false; cb.innerHTML = `${RUN.combo}x<small>COMBO</small>`; cb.style.fontSize = Math.min(40, 22 + Math.log2(RUN.combo) * 2.2) + 'px'; cb.classList.remove('bump'); void cb.offsetWidth; cb.classList.add('bump'); } }
   else cb.classList.remove('on');
-  if (RUN.xpFlash > 0) { RUN.xpFlash -= dt; $('xpbar').classList.add('gain'); } else $('xpbar').classList.remove('gain');
+  { const g = RUN.xpFlash > 0; if (g) RUN.xpFlash -= dt; if (RUN.xpG !== g) { RUN.xpG = g; $('xpbar').classList.toggle('gain', g); } }
   if (PL.hp > 0 && PL.hp < S.maxHp * 0.25) { RUN.heartT = (RUN.heartT || 0) - dt; if (RUN.heartT <= 0) { RUN.heartT = 0.9; sfx('heart', 0.5); $('vignette').style.opacity = 0.75; setTimeout(() => { if (PL.hp < S.maxHp * 0.25) $('vignette').style.opacity = 0.4; }, 160); } }
-  $('xpfill').style.width = (PL.xp / PL.xpNext * 100).toFixed(1) + '%';
-  $('hpfill').style.width = clamp(PL.hp / S.maxHp * 100, 0, 100).toFixed(1) + '%';
+  setW('xpfill', PL.xp / PL.xpNext * 100);
+  setW('hpfill', clamp(PL.hp / S.maxHp * 100, 0, 100));
   hudT -= dt; if (hudT > 0 && !slotsDirty) return; hudT = 0.1;
-  $('lvl').textContent = 'Nv ' + PL.level;
+  setTxt('lvl', 'Nv ' + PL.level);
   updateStageHUD();
-  { const at = $('autoTag'), on = autoOn(), wk = walkOn(); at.style.display = on || wk ? 'block' : 'none'; if (on || wk) at.textContent = '🤖 ' + [wk ? ((PL.manualT || 0) > 0 ? 'Você no controle' : 'Andando') : '', on ? `Build: ${autoPresetName()}` : ''].filter(Boolean).join(' • '); }
+  { const at = $('autoTag'), on = autoOn(), wk = walkOn(), dsp = on || wk ? 'block' : 'none'; if (at._d !== dsp) { at._d = dsp; at.style.display = dsp; } if (on || wk) setTxt('autoTag', '🤖 ' + [wk ? ((PL.manualT || 0) > 0 ? 'Você no controle' : 'Andando') : '', on ? `Build: ${autoPresetName()}` : ''].filter(Boolean).join(' • ')); }
   if (isCoop()) { const h = PLAYERS.map((q) => `<div class="cp${q.down ? ' down' : ''}" style="border-color:${q.color}"><div style="color:${q.color}">${q.tag} • ${esc(q.formName)} • Nv ${q.level}${q.down ? ' 💀' : ''}</div><div class="hb"><i style="width:${clamp(q.hp / q.S.maxHp * 100, 0, 100).toFixed(0)}%"></i></div><div class="xb"><i style="width:${(q.xp / q.xpNext * 100).toFixed(0)}%"></i></div><div class="mv">${q.moves.map((m) => m.def.icon).join('')} ${q.items.map((x) => D.ITEMS[x.id].icon).join('')}</div></div>`).join(''); if (h !== RUN.coopHTML) { RUN.coopHTML = h; $('coopBar').innerHTML = h; } }
-  $('kills').textContent = RUN.kills.toLocaleString('pt-BR');
-  $('coins').textContent = Math.floor(RUN.coins).toLocaleString('pt-BR');
-  $('pname').textContent = `${PL.formName} • ${PL.types.map(typeName).join('/')}`;
-  $('hptext').textContent = `${Math.ceil(PL.hp)} / ${S.maxHp} HP` + (PL.sash ? ` • 🎗️${PL.sash}` : '') + (PL.revives ? ` • 💊${PL.revives}` : '');
+  if (RUN.killsV !== RUN.kills) { RUN.killsV = RUN.kills; setTxt('kills', RUN.kills.toLocaleString('pt-BR')); }
+  { const c = Math.floor(RUN.coins); if (RUN.coinsV !== c) { RUN.coinsV = c; setTxt('coins', c.toLocaleString('pt-BR')); } }
+  if (RUN.pnK !== PL.formName + PL.types.length) { RUN.pnK = PL.formName + PL.types.length; setTxt('pname', `${PL.formName} • ${PL.types.map(typeName).join('/')}`); }
+  setTxt('hptext', `${Math.ceil(PL.hp)} / ${S.maxHp} HP` + (PL.sash ? ` • 🎗️${PL.sash}` : '') + (PL.revives ? ` • 💊${PL.revives}` : ''));
   if (slotsDirty) {
     slotsDirty = false;
     let h = ''; for (let k = 0; k < 6; k++) { const m = PL.moves[k]; h += m ? `<div class="slot${m.def.legendary ? ' leg' : ''}" style="border-color:${m.def.legendary ? '' : typeColor(m.def.type)}" title="${esc(moveName(m.def, m.lvl))}">${m.def.icon}<b>${m.def.legendary ? '★' : m.lvl}</b></div>` : '<div class="slot"></div>'; }
@@ -4167,6 +4254,7 @@ function buildMenu() {
       <div class="opt"><span>Música</span><input type="range" min="0" max="1" step="0.05" value="${o.music}" data-opt="music"></div>
       <div class="opt"><span>Tremida de câmera</span><button class="btn ${o.shake ? '' : 'gray'}" data-go="toggle" data-id="shake">${o.shake ? 'Ligada' : 'Desligada'}</button></div>
       <div class="opt"><span>Números de dano</span><button class="btn ${o.numbers ? '' : 'gray'}" data-go="toggle" data-id="numbers">${o.numbers ? 'Ligados' : 'Desligados'}</button></div>
+      <div class="opt" title="Fps: baixa a resolução interna, partículas e contornos sozinho quando os quadros começam a atrasar, e volta quando sobra folga."><span>Prioridade</span><button class="btn ${o.prioVisual ? 'gray' : ''}" data-go="toggle" data-id="prioVisual">${o.prioVisual ? 'Visual (fixo)' : 'Fps (automático)'}</button></div>
       <div class="opt"><span>Estilo gráfico</span><button class="btn" data-go="gfxs" data-id="opts">${esc(GS.name)} ▸</button></div></div>
       ${autoOptsHTML()}
       <div class="box"><div class="muted">Progresso salvo neste navegador (localStorage).</div><div class="row" style="margin-top:8px"><button class="btn red" data-go="reset">${MENU.confirmReset ? 'Tem certeza? Clique de novo' : 'Apagar progresso'}</button></div></div>
@@ -4219,7 +4307,7 @@ function clearRun() {
   for (let k = aliveN - 1; k >= 0; k--) removeEnemy(aliveList[k]);
   for (const p of PR) p.on = false; for (const q of EB) q.on = false; clearPickups(); clearParticles(); clearFx(); STRIKES.length = 0; NOVAS.length = 0; BSTRIKES.length = 0;
   if (SECRET.mesh) { scene.remove(SECRET.mesh); SECRET.mesh = null; }
-  document.body.classList.remove('glitch');
+  setGlitch(false);
   for (const b of BOSSES) removeBossMeshes(b); BOSSES.length = 0;
   for (const p of PLAYERS) {
     for (const m of p.moves) disposeMove(m); p.moves = []; p.items = []; p.queue = [];
@@ -4294,7 +4382,7 @@ function endRun(won) {
   if (RUN.ended) return; RUN.ended = true; state = 'over';
   sfx(won ? 'fanfare' : 'faint'); musicStop();
   for (const id of ['levelup', 'chest', 'pause', 'evo']) hide(id);
-  document.body.classList.remove('glitch');
+  setGlitch(false);
   const st = SAVE.stats; const mapId = RUN.startMap;
   if (!won) st.deaths++; else if (!RUN.boughtChest) st.noChestWin = true;
   if (won) { st.wins++; for (const sl of RUN.team) st.winsByChar[sl.char] = (st.winsByChar[sl.char] || 0) + 1; st.winsByMap[mapId] = (st.winsByMap[mapId] || 0) + 1; if (isCoop()) st.coopWins = (st.coopWins || 0) + 1; if (PLAYERS.length >= 4) st.wins4 = (st.wins4 || 0) + 1; }
@@ -4350,6 +4438,7 @@ function renderPauseOpts() {
     <div class="opt"><span>Música</span><input type="range" min="0" max="1" step="0.05" value="${o.music}" data-opt="music"></div>
     <div class="opt"><span>Tremida de câmera</span><button class="btn ${o.shake ? '' : 'gray'}" data-go="toggle" data-id="shake">${o.shake ? 'Ligada' : 'Desligada'}</button></div>
     <div class="opt"><span>Números de dano</span><button class="btn ${o.numbers ? '' : 'gray'}" data-go="toggle" data-id="numbers">${o.numbers ? 'Ligados' : 'Desligados'}</button></div>
+      <div class="opt" title="Fps: baixa a resolução interna, partículas e contornos sozinho quando os quadros começam a atrasar, e volta quando sobra folga."><span>Prioridade</span><button class="btn ${o.prioVisual ? 'gray' : ''}" data-go="toggle" data-id="prioVisual">${o.prioVisual ? 'Visual (fixo)' : 'Fps (automático)'}</button></div>
     <div class="opt" style="align-items:start"><span>Estilo gráfico</span><div><div class="row" style="margin:0;gap:6px;flex-wrap:wrap">${Object.entries(GFX_STYLES).map(([id, st]) => `<button class="btn ${id === GFX_ID ? '' : 'gray'}" style="font-size:13px;padding:6px 10px" data-go="pauseGfx" data-id="${id}">${esc(st.name)}</button>`).join('')}</div>
       <div class="muted" style="margin-top:6px;color:${PAUSE_GFX ? '#ffd84a' : ''}">${PAUSE_GFX ? `Trocar para <b>${esc(GFX_STYLES[PAUSE_GFX].name)}</b> recarrega o jogo e ENCERRA esta partida. Clique de novo para confirmar.` : `Agora: ${esc(GS.name)}. ${esc(GS.desc)}`}</div></div></div></div>
     ${autoOptsHTML()}
@@ -4463,7 +4552,7 @@ function nextStage() {
   for (const p of PR) p.on = false; for (const q of EB) q.on = false; BSTRIKES.length = 0; STRIKES.length = 0; NOVAS.length = 0; clearFx();
   RUN.stage++; st.maxStage = Math.max(st.maxStage, RUN.stage);
   RUN.map = stageMapFor(RUN.stage); RUN.stageT = 0; RUN.swarm = false; RUN.swarmT = 0; RUN.reaper = false; RUN.eventsDone = new Set(); RUN.eventAlive = 0; RUN.spawnAcc = 0;
-  document.body.classList.remove('glitch'); musicBoss(false); musicStart(RUN.map.music);
+  setGlitch(false); musicBoss(false); musicStart(RUN.map.music);
   setupWorld(RUN.map); CAM.x = 0; CAM.z = 0; VIEW.x = 0; VIEW.z = 0;
   PLAYERS.forEach((q, k) => { usePlayer(q); q.x = isCoop() ? (k - (PLAYERS.length - 1) / 2) * 1.8 : 0; q.z = 0; q.invuln = 2.5; if (q.down) { q.down = false; q.reviveT = 0; q.hp = 1; setGhost(q, false); } heal(S.maxHp * STG.healOnExit, true); });
   usePlayer(PLAYERS[0]);
@@ -4472,7 +4561,7 @@ function nextStage() {
   sfx('fanfare'); fxSpawn('ring', 0, 0, { r0: 0.5, r1: 12, life: 0.7, color: '#60ff90', opacity: 1 }); persist(); checkAchievements();
 }
 function summonReaper() {
-  RUN.reaper = true; spawnBoss('err404'); document.body.classList.add('glitch'); sfx('glitch');
+  RUN.reaper = true; spawnBoss('err404'); setGlitch(true); sfx('glitch');
   banner('ERR#404 VEIO TE BUSCAR!', '▓▒░ Você ficou tempo demais no Enxame. CORRA PRO PORTAL! ░▒▓', 4, '#ff60ff');
 }
 function breakPot(o) {
@@ -4612,32 +4701,38 @@ function openTotem() {
 }
 
 /* ------------------------------------------------------------ LOOP */
+/* medidor de tempo por sistema (debug): PS.prof(true) liga; PS.prof() devolve ms médios por quadro */
+const PROF = { on: false, t: {}, n: 0 };
+const pf = (k, t0) => { if (PROF.on) PROF.t[k] = (PROF.t[k] || 0) + performance.now() - t0; };
 function update(dt) {
+  const T0 = PROF.on ? performance.now() : 0; let t0 = T0; if (PROF.on) PROF.n++;
+  const lap = (k) => { if (PROF.on) { const t = performance.now(); PROF.t[k] = (PROF.t[k] || 0) + t - t0; t0 = t; } };
   RUN.time += dt;
   RUN.secT += dt; if (RUN.secT >= 1) { RUN.secT = 0; const m = RUN.time / 60; RUN.hpMult = (1 + BAL.hpGrowth[0] * m + BAL.hpGrowth[1] * m * m) * RUN.map.diff * STG.diff[RUN.stage - 1] * (1 + RUN.diffAdd) * (RUN.swarm ? 1 + RUN.swarmT / 60 * STG.swarm.hpPerMin : 1) * (1 + COOP.hpPerPlayer * (PLAYERS.length - 1)); RUN.dmgMult = (1 + BAL.dmgGrowth * m) * Math.sqrt(RUN.map.diff); onSecond(); }
   for (const k in effT) effT[k] -= dt;
   if (pickStreakT > 0) { pickStreakT -= dt; if (pickStreakT <= 0) pickStreak = 0; }
   obsRebuild(NET.role === 'host' ? PLAYERS : [VIEW]);
+  lap('inicio');
   for (const p of PLAYERS) { usePlayer(p); if (p.down) updateDowned(dt); else updatePlayer(dt); }
   for (const k in DASHQ) DASHQ[k] = false;
-  updateView();
-  gridBuild();
-  updateSpawning(dt);
-  updateEnemies(dt);
-  updateBosses(dt);
-  for (const p of PLAYERS) if (!p.down) { usePlayer(p); updateMoves(dt); }
-  updateProjectiles(dt);
+  updateView(); lap('jogador+piloto');
+  gridBuild(); lap('grade');
+  updateSpawning(dt); lap('spawn');
+  updateEnemies(dt); lap('inimigos');
+  updateBosses(dt); lap('chefes');
+  for (const p of PLAYERS) if (!p.down) { usePlayer(p); updateMoves(dt); } lap('magias');
+  updateProjectiles(dt); lap('projeteis');
   updateEnemyBullets(dt);
   updateStrikes(dt);
   updateBossStrikes(dt);
-  updateNovas(dt);
-  updatePickups(dt);
+  updateNovas(dt); lap('areas');
+  updatePickups(dt); lap('coletaveis');
   updateStage(dt);
   updateSecret(dt);
   updateFx(dt);
-  updateParticles(dt);
-  renderEnemies(); renderProjVis();
-  updateWorld(PL.x, PL.z);
+  updateParticles(dt); lap('fx+particulas');
+  renderEnemies(); renderProjVis(); lap('render-inimigos');
+  updateWorld(PL.x, PL.z); lap('mundo');
   numTokens = Math.min(30, numTokens + dt * 80); sparkTokens = Math.min(40, sparkTokens + dt * 120);
   if (RUN.comboT > 0) { RUN.comboT -= dt; if (RUN.comboT <= 0) RUN.combo = 0; }
   RUN.critT -= dt; if (RUN.qWait > 0) RUN.qWait -= dt;
@@ -4706,34 +4801,109 @@ function updateCamera(dt) {
 }
 let last = performance.now(), fpsAcc = 0, fpsN = 0, fps = 60;
 let manualTick = false; // debug: gravação conduz o loop por fora
+/* QUALIDADE ADAPTATIVA (Opções → Prioridade: fps). Descobre o intervalo da tela (60/120/144 Hz) pelo menor intervalo recente,
+   conta quadros perdidos e desce/sobe um nível de PF.adaptive.levels: resolução interna, partículas, contornos, brilho e sombras. */
+const QA = {
+  lvl: 0, res: 1, pt: 1, champ: 1, shadowHalf: false, fN: 0, per: 1000 / 60, minI: new Float32Array(90), mi: 0, miss: [], calm: 0, lockT: 0, raisedAt: -1e9, work: 0,
+  on() { return !SAVE.opts.prioVisual && !QS.has('bench'); },
+  sample(iv, now) {
+    if (document.hidden || iv > 100 || iv <= 0) return; // aba escondida ou volta de pausa: não conta
+    this.minI[this.mi = (this.mi + 1) % 90] = iv; let m = 1e9; for (let k = 0; k < 90; k++) { const v = this.minI[k]; if (v > 0 && v < m) m = v; }
+    this.per = clamp(m, 4, 40);
+    if (state !== 'playing' && state !== 'netview') { this.calm = 0; return; }
+    if (!this.on()) { if (this.lvl) this.set(0); return; }
+    const A = PF.adaptive; if (iv > this.per * 1.5) this.miss.push(now); while (this.miss.length && this.miss[0] < now - 1000) this.miss.shift();
+    this.lockT -= iv / 1000;
+    if (this.miss.length >= A.dropMiss && this.lvl < A.levels.length - 1) { if (now - this.raisedAt < 3000) this.lockT = A.lockAfterFail; this.set(this.lvl + 1); this.miss.length = 0; this.calm = 0; return; }
+    if (this.miss.length || this.work > this.per * A.slack) { this.calm = 0; return; }
+    this.calm += iv / 1000; if (this.calm > A.raiseAfter && this.lvl > 0 && this.lockT <= 0) { this.set(this.lvl - 1); this.raisedAt = now; this.calm = 0; }
+  },
+  set(l) {
+    const L = PF.adaptive.levels[l]; this.lvl = l; this.pt = L.pt; this.champ = l >= 2 ? 0.85 : 1;
+    if (this.res !== L.res) { this.res = L.res; resize(); }
+    for (const sp of SPECIES_LIST) if (sp.ol) sp.ol.userData.qaOff = !!L.noOutline;
+    if (bloomPass) bloomPass.enabled = !L.noBloom;
+    this.shadowHalf = !!L.noShadows; if (GFX.shadows) renderer.shadowMap.autoUpdate = !this.shadowHalf;
+  },
+};
 function frame(now) {
   requestAnimationFrame(frame);
-  let rdt = (now - last) / 1000; last = now; if (rdt > 0.1) rdt = 0.1;
-  if (!manualTick) tick(rdt);
+  const iv = now - last; if (PERF.on) PERF.frame(iv); QA.sample(iv, now);
+  let rdt = iv / 1000; last = now; if (rdt > 0.1) rdt = 0.1;
+  // ritmo: o intervalo vem com ruído do navegador (16,4 / 17,1 ms...); arredonda para múltiplos do intervalo da tela, sem saltos
+  { const p = QA.per / 1000, k = Math.max(1, Math.round(rdt / p)); if (Math.abs(rdt - k * p) < p * 0.25) rdt = k * p; }
+  if (!manualTick) { const t0 = performance.now(); tick(rdt); QA.work += (performance.now() - t0 - QA.work) * 0.1; }
 }
+/* ------------------------------------------------------------ DESEMPENHO (F3 ou ?perf=1)
+   Mede cada parte do quadro, o tempo da placa de vídeo (quando o navegador deixa), a memória e as pausas do coletor de lixo. */
+const PERF = {
+  on: QS.has('perf'), show: QS.has('perf'), N: 240, ints: new Float32Array(240), work: new Float32Array(240), gcMark: new Uint8Array(240), ii: 0,
+  ema: { work: 0, logic: 0, hud: 0, overlay: 0, render: 0, gpu: 0 }, steps: 0, heap: 0, alloc: 0, allocAcc: 0, allocT: 0, gc: [], q: null, ext: null, txtT: 0,
+  frame(dt) { const i = this.ii = (this.ii + 1) % this.N; this.ints[i] = dt; this.gcMark[i] = 0; },
+  e(k, v) { this.ema[k] += (v - this.ema[k]) * 0.08; },
+  sampleHeap(dt) {
+    const m = performance.memory; if (!m) return; const h = m.usedJSHeapSize;
+    if (this.heap) { const d = h - this.heap; if (d > 0) this.allocAcc += d; else if (d < -1.5e6) { this.gc.push({ t: performance.now(), mb: -d / 1048576 }); this.gcMark[this.ii] = 1; } }
+    this.heap = h; this.allocT += dt; if (this.allocT >= 1) { this.alloc = this.allocAcc / 1048576 / this.allocT; this.allocAcc = 0; this.allocT = 0; }
+    const lim = performance.now() - 10000; while (this.gc.length && this.gc[0].t < lim) this.gc.shift();
+  },
+  gpuBegin() {
+    const gl = renderer.getContext(); if (this.ext === null) this.ext = gl.getExtension('EXT_disjoint_timer_query_webgl2') || false; if (!this.ext) return false;
+    if (this.q) { if (!gl.getQueryParameter(this.q, gl.QUERY_RESULT_AVAILABLE)) return false; if (!gl.getParameter(this.ext.GPU_DISJOINT_EXT)) this.e('gpu', gl.getQueryParameter(this.q, gl.QUERY_RESULT) / 1e6); gl.deleteQuery(this.q); }
+    this.q = gl.createQuery(); gl.beginQuery(this.ext.TIME_ELAPSED_EXT, this.q); return true;
+  },
+  gpuEnd() { const gl = renderer.getContext(); gl.endQuery(this.ext.TIME_ELAPSED_EXT); },
+  toggle() { this.show = !this.show; this.on = this.show; PROF.on = this.on; PROF.t = {}; PROF.n = 0; let el = $('perf'); if (!el) { el = document.createElement('div'); el.id = 'perf'; el.innerHTML = '<canvas width="240" height="64"></canvas><pre></pre>'; document.body.appendChild(el); } el.style.display = this.show ? 'block' : 'none'; },
+  stats() {
+    const a = Array.from(this.ints).filter((v) => v > 0).sort((x, y) => x - y); if (!a.length) return null; const avg = a.reduce((x, y) => x + y, 0) / a.length;
+    const lowN = Math.max(1, Math.floor(a.length * 0.01)), low = a.slice(-lowN).reduce((x, y) => x + y, 0) / lowN;
+    return { fps: 1000 / avg, low1: 1000 / low, max: a[a.length - 1], over12: a.filter((v) => v > 12).length };
+  },
+  draw() {
+    const el = $('perf'); if (!el || !this.show) return; const cv = el.firstChild, g = cv.getContext('2d'); g.clearRect(0, 0, 240, 64);
+    for (let k = 0; k < this.N; k++) { const i = (this.ii + 1 + k) % this.N, v = this.ints[i], w = this.work[i]; const h = Math.min(64, v * 2.4);
+      g.fillStyle = v > 12 ? '#ff4d5e' : v > 8.6 ? '#ffd84a' : '#4ade80'; g.fillRect(k, 64 - h, 1, h); g.fillStyle = 'rgba(122,208,255,.9)'; g.fillRect(k, 64 - Math.min(64, w * 2.4), 1, 1); if (this.gcMark[i]) { g.fillStyle = '#ff60ff'; g.fillRect(k, 0, 1, 6); } }
+    g.fillStyle = 'rgba(255,255,255,.5)'; g.fillRect(0, 64 - 8.33 * 2.4, 240, 1);
+    this.txtT -= 1; if (this.txtT > 0) return; this.txtT = 15;
+    const st = this.stats(), E = this.ema, c = typeof PSC === 'function' ? PSC() : {}, ri = renderer.info.render;
+    el.lastChild.textContent = `${st ? `fps ${st.fps.toFixed(0)}  1% baixo ${st.low1.toFixed(0)}  pior ${st.max.toFixed(1)} ms  >12ms: ${st.over12}/240` : 'fps —  (sem quadros do navegador ainda)'}
+quadro ${E.work.toFixed(2)} ms = lógica ${E.logic.toFixed(2)} (${this.steps} passos) + HUD ${E.hud.toFixed(2)} + texto ${E.overlay.toFixed(2)} + desenho ${E.render.toFixed(2)}
+qualidade ${PF.adaptive.levels[QA.lvl].name}${QA.on() ? ' (auto)' : ' (fixa)'}  tela ${(1000 / QA.per).toFixed(0)} Hz
+placa de vídeo ${this.ext ? E.gpu.toFixed(2) + ' ms' : 'sem contador'}  chamadas ${ri.calls}  triângulos ${(ri.triangles / 1000).toFixed(0)}k  ${renderer.domElement.width}x${renderer.domElement.height}
+memória ${(this.heap / 1048576).toFixed(0)} MB  lixo ${this.alloc.toFixed(1)} MB/s  coletas ${this.gc.length}/10s
+inimigos ${c.inimigos || 0}  coletáveis ${c.coletaveis || 0}  partículas ${c.particulas || 0}  números ${c.numeros || 0}  tiros ${c.projeteis || 0}/${c.tirosInimigos || 0}`;
+  },
+};
+const PSC = () => ({ inimigos: aliveN, projeteis: PR.reduce((n, p) => n + (p.on ? 1 : 0), 0), tirosInimigos: EB.reduce((n, b) => n + (b.on ? 1 : 0), 0), coletaveis: PK.reduce((n, p) => n + (p.on ? 1 : 0), 0), particulas: PT.life.reduce((n, v) => n + (v > 0 ? 1 : 0), 0), efeitos: FX.reduce((n, f) => n + (f.on ? 1 : 0), 0), numeros: NUMS.reduce((n, x) => n + (x.on ? 1 : 0), 0), golpes: STRIKES.length, ondas: NOVAS.length });
 function tick(rdt) {
+  const W0 = PERF.on ? performance.now() : 0; if (PERF.on) { PROF.on = true; PERF.sampleHeap(rdt); }
   fpsAcc += rdt; fpsN++; if (fpsAcc > 0.5) { fps = fpsN / fpsAcc; fpsAcc = 0; fpsN = 0; }
   pollGamepad(rdt);
   if (state === 'levelup' || NETUI.open) autoStep(rdt); else if (AUTO.dec) autoClear();
   if (state === 'chest' && autoOn()) { AUTO.chestT += rdt; if (AUTO.chestT > D.AUTOPLAY.chestSec) { AUTO.chestT = 0; closeChest(); closeChest(); } } else AUTO.chestT = 0;
+  ptBudget = Math.round(PF.particlesPerFrame * QA.pt);
   if (state === 'playing' && RUN.hitstop > 0) { RUN.hitstop -= rdt; updateHUD(rdt); }
   else if (state === 'playing') {
     let ts = RUN.slowmo > 0 ? 0.25 : 1; if (RUN.slowmo > 0) RUN.slowmo -= rdt; if (DEBUG && DBG.fast) ts *= 4;
-    let t = rdt * ts, steps = 0; while (t > 1e-5 && steps++ < 6) { const s = Math.min(t, 1 / 30); update(s); t -= s; }
-    updateHUD(rdt);
+    let t = rdt * ts, steps = 0; const L0 = PERF.on ? performance.now() : 0; while (t > 1e-5 && steps++ < 6) { const s = Math.min(t, 1 / 30); update(s); t -= s; }
+    if (PERF.on) { PERF.e('logic', performance.now() - L0); PERF.steps = steps; }
+    const H0 = PERF.on ? performance.now() : 0; updateHUD(rdt); if (PERF.on) PERF.e('hud', performance.now() - H0);
   } else if (state === 'evolving') { updateEvolution(rdt); updateParticles(rdt); updateFx(rdt); }
   else if (state === 'netview') netGuestUpdate(rdt);
   if (NET.role === 'host' && RUN && state !== 'menu' && state !== 'over') netHostTick(rdt);
   else if (state === 'menu') updateMenuScene(rdt);
   updateBanner(rdt);
   updateCamera(rdt);
-  GFX.time.value += rdt;
+  GFX.time.value += rdt; if (glitchPass) glitchPass.uniforms.uGT.value = GFX.time.value;
   if (state === 'menu') followSun(MENU.px || 0, 0); else if (state === 'netview') followSun(VIEW.x, VIEW.z); else if (RUN) { followSun(VIEW.x, VIEW.z); if (state === 'playing') updateAmbient(rdt, VIEW.x, VIEW.z); }
   for (const q of PLAYERS) if (q.mesh) q.mesh.userData.mat.userData.anim.uMove.value = q.moving ? 1 : 0.15;
   if (DEBUG && DBG.noRender) return; // testes com 2 abas: a aba de trás roda só a lógica
-  renderFrame();
-  drawOverlay(state === 'playing' || state === 'netview' ? rdt : state === 'evolving' ? rdt * 0.5 : 0);
-  if (DEBUG) $('dbg').textContent = `fps ${fps.toFixed(0)}  inimigos ${aliveN}  proj ${PR.filter((p) => p.on).length}  draw ${renderer.info.render.calls}`;
+  if (PERF.on) { renderer.info.autoReset = false; renderer.info.reset(); } // conta as chamadas de todas as passagens do quadro
+  if (QA.shadowHalf) renderer.shadowMap.needsUpdate = (QA.fN++ & 1) === 0; // qualidade baixa: sombras a cada 2 quadros
+  const R0 = PERF.on ? performance.now() : 0, gq = PERF.on && PERF.gpuBegin(); renderFrame(); if (gq) PERF.gpuEnd(); if (PERF.on) PERF.e('render', performance.now() - R0);
+  const O0 = PERF.on ? performance.now() : 0; drawOverlay(state === 'playing' || state === 'netview' ? rdt : state === 'evolving' ? rdt * 0.5 : 0); if (PERF.on) PERF.e('overlay', performance.now() - O0);
+  if (DEBUG && !PERF.show) $('dbg').textContent = `fps ${fps.toFixed(0)}  inimigos ${aliveN}  draw ${renderer.info.render.calls}  (F3: desempenho)`;
+  if (PERF.on) { const w = performance.now() - W0; PERF.work[PERF.ii] = w; PERF.e('work', w); PERF.draw(); }
 }
 let PEDESTAL = null;
 function updateMenuScene(dt) {
@@ -4806,6 +4976,7 @@ window.addEventListener('keydown', (e) => {
     if (e.code === 'Enter' || e.code === 'NumpadEnter' || e.code === 'ShiftRight') { DASHQ.kbB = DASHQ.any = true; }
   }
   if (NET.on && !NETUI.open && !e.repeat && (state === 'playing' || state === 'netview') && e.code >= 'Digit1' && e.code <= 'Digit4') { emote(+e.code.slice(5) - 1); return; }
+  if (e.code === 'F3' && !e.repeat) { e.preventDefault(); PERF.toggle(); return; }
   if (e.code === 'KeyY' && !e.repeat && (state === 'playing' || state === 'levelup' || state === 'paused' || state === 'netview')) { autoToggle(); if (state === 'paused') renderPauseOpts(); return; }
   if (e.code === 'KeyT' && !e.repeat && (state === 'playing' || state === 'levelup' || state === 'paused' || state === 'netview')) { walkToggle(); if (state === 'paused') renderPauseOpts(); return; }
   if (NETUI.open && !e.repeat) { if (e.code >= 'Digit1' && e.code <= 'Digit4') { netCardAct(+e.code.slice(5) - 1); return; } if (e.code === 'KeyR') { netCardAct(-1, 'reroll'); return; } if (e.code === 'KeyP' && NET.role === 'guest') { netCardAct(-1, 'skip'); return; } }
@@ -5017,10 +5188,10 @@ function netBinFor(me, withPicks) {
   const hdr = o; o += 8; let nE = 0, nP = 0, nB = 0, nK = 0;
   for (let k = 0; k < aliveN && nE < 1400; k++) {
     const i = aliveList[k]; if (E.boss[i] >= 0) continue; const x = E.x[i], z = E.z[i]; if (!inV(x, z, 2)) continue;
-    // byte A: espécie (5 bits) | dourado (2) | piscando (1) • byte B: rotação (5 bits) | frio (1) | altura (2: chão, pulo, alto, céu)
+    // byte A: espécie (5 bits) | dourado (2; o valor 3 = campeão da horda) | piscando (1) • byte B: rotação (5 bits) | frio (1) | altura (2: chão, pulo, alto, céu)
     const ya = E.y[i], yb = ya <= 0.05 ? 0 : ya < 1.2 ? 1 : ya < 6 ? 2 : 3;
     dv.setUint16(o, i, true); dv.setInt16(o + 2, q16(x - cx), true); dv.setInt16(o + 4, q16(z - cz), true);
-    dv.setUint8(o + 6, ((ENEMY_IX[E.defs[i].id] || 0) & 31) | ((E.shiny[i] & 3) << 5) | (E.flash[i] > 0 ? 128 : 0));
+    dv.setUint8(o + 6, ((ENEMY_IX[E.defs[i].id] || 0) & 31) | (((E.shiny[i] || (E.big[i] > 1.25 ? 3 : 0)) & 3) << 5) | (E.flash[i] > 0 ? 128 : 0));
     dv.setUint8(o + 7, ((((E.rot[i] % TAU + TAU) % TAU) / TAU * 32) & 31) | (E.freeze[i] > 0 || E.slow[i] > 0 ? 32 : 0) | (yb << 6)); o += 8; nE++;
   }
   const keys = PVIS_KEYS();
@@ -5208,7 +5379,7 @@ function netGuestBin(buf) {
     const fresh = NG.seen[i] !== sn - 1 || E.defs[i] !== D.ENEMIES[ENEMY_IDS[sp]];
     if (fresh) { const id = ENEMY_IDS[sp], def = D.ENEMIES[id]; dexSee(def.species || id); E.defs[i] = def; E.sp[i] = species(id); E.rad[i] = def.radius || def.scale * 0.5; E.phase[i] = (i * 0.618) % TAU; E.boss[i] = -1; E.ev[i] = 0; NG.prevX[i] = x; NG.prevZ[i] = z; E.rot[i] = rot; }
     else { NG.prevX[i] = E.x[i]; NG.prevZ[i] = E.z[i]; }
-    NG.curX[i] = x; NG.curZ[i] = z; NG.rot[i] = rot; E.y[i] = y; E.flash[i] = fl & 1 ? 0.06 : 0; E.shiny[i] = (fl >> 1) & 3; E.freeze[i] = fl & 8 ? 1 : 0; E.slow[i] = fl & 16 ? 1 : 0;
+    NG.curX[i] = x; NG.curZ[i] = z; NG.rot[i] = rot; E.y[i] = y; E.flash[i] = fl & 1 ? 0.06 : 0; { const sh = (fl >> 1) & 3; E.shiny[i] = sh === 3 ? 0 : sh; E.big[i] = sh === 3 ? 1.7 : 1; } E.freeze[i] = fl & 8 ? 1 : 0; E.slow[i] = fl & 16 ? 1 : 0;
     NG.seen[i] = sn; NG.list[n++] = i;
   }
   // quem sumiu perto do meio da tela morreu: estoura (o anfitrião não manda partículas)
@@ -5339,11 +5510,11 @@ function netGuestHUD() {
   const P = NG.P, me = NET.me; if (!P || !me) return;
   const left = STG.time - P.st, tm = $('timer'); tm.textContent = P.sw >= 0 ? 'ENXAME +' + fmtTime(P.sw) : fmtTime(Math.max(0, left)); tm.classList.toggle('swarm', P.sw >= 0 || left < 60);
   $('stageTag').textContent = `FASE ${NET.stage || 1}/${STG.count} • ${NET.map ? NET.map.name : ''} • SALA ${NET.code} • ${Math.round(NET.rtt)} ms`; netGuestObjectives();
-  $('kills').textContent = P.k.toLocaleString('pt-BR'); $('coins').textContent = P.c.toLocaleString('pt-BR');
-  $('xpfill').style.width = ((me.xpf || 0) * 100).toFixed(1) + '%'; $('lvl').textContent = 'Nv ' + (me.lv || 1);
+  setTxt('kills', P.k.toLocaleString('pt-BR')); setTxt('coins', P.c.toLocaleString('pt-BR'));
+  setW('xpfill', (me.xpf || 0) * 100); setTxt('lvl', 'Nv ' + (me.lv || 1));
   const h = NET.av.map((q) => `<div class="cp${q.down ? ' down' : ''}" style="border-color:${q.color}"><div style="color:${q.color}">${q.tag}${q === me ? ' (você)' : ''} • ${esc(q.name || '')} • Nv ${q.lv || 1}${q.down ? ' 💀' : ''}${q.gone ? ' • caiu' : ''}</div><div class="hb"><i style="width:${clamp((q.hp || 0) / (q.mh || 1) * 100, 0, 100).toFixed(0)}%"></i></div><div class="xb"><i style="width:${((q.xpf || 0) * 100).toFixed(0)}%"></i></div><div class="mv">${q.mvI || ''} ${q.itI || ''}</div></div>`).join('');
   if (h !== NET.hudH) { NET.hudH = h; $('coopBar').innerHTML = h; }
-  { const at = $('autoTag'), on = !!SAVE.opts.autoBuild, wk = walkOn(); at.style.display = on || wk ? 'block' : 'none'; if (on || wk) at.textContent = '🤖 ' + [wk ? ((me.manualT || 0) > 0 ? 'Você no controle' : 'Andando') : '', on ? `Build: ${autoPresetName()}` : ''].filter(Boolean).join(' • '); }
+  { const at = $('autoTag'), on = !!SAVE.opts.autoBuild, wk = walkOn(), dsp = on || wk ? 'block' : 'none'; if (at._d !== dsp) { at._d = dsp; at.style.display = dsp; } if (on || wk) setTxt('autoTag', '🤖 ' + [wk ? ((me.manualT || 0) > 0 ? 'Você no controle' : 'Andando') : '', on ? `Build: ${autoPresetName()}` : ''].filter(Boolean).join(' • ')); }
   const b = [...NG.bosses.values()][0], el = $('bossBar');
   if (!b) el.style.display = 'none'; else { el.style.display = 'block'; $('bossName').textContent = b.def.invincible ? 'ERR#404 ▓▒░ ??? ░▒▓' : b.def.name + (b.def.legendary ? ' ★ LENDÁRIO' : ''); $('bossFill').style.width = (b.def.invincible ? 50 + Math.random() * 50 : clamp(b.h * 100, 0, 100)).toFixed(1) + '%'; }
 }
@@ -5666,6 +5837,7 @@ function init() {
   for (const k of PK_KINDS) { const cap = k === 'gema' ? 1600 : k === 'coin' ? 300 : 60; const m = makeInst(getGeo(k), MAT_PICKUP, cap, true); m.userData.cap = cap; PKMESH[k] = m; m.userData.ol = makeOutlineInst(m, 0.03, {}); }
   setupWorld(D.MAPS.find((m) => m.id === SAVE.lastMap) || D.MAPS[0]);
   if (DEBUG) $('dbg').style.display = 'block';
+  if (QS.has('perf')) { PERF.show = false; PERF.toggle(); }
   const sala = (QS.get('sala') || '').toUpperCase().replace(/[^A-Z]/g, '');
   if (sala.length === 5) { MENU.screen = 'online'; buildMenu(); netJoin(sala); } else buildMenu();
   const firstAudio = () => { if (state === 'menu' && !MUS.timer) musicStart(MENU_SONG); };
@@ -5686,9 +5858,10 @@ function sim(secs, mover, chooser) {
   for (const n of NUMS) n.on = false; updateHUD(1); renderFrame();
   return { log, ms: Math.round(performance.now() - t0), msPorFrame: +((performance.now() - t0) / Math.max(1, frames)).toFixed(2), time: Math.round(RUN.time), lvl: PL.level, form: PL.formName, kills: RUN.kills, alive: aliveN, hp: Math.round(PL.hp), state, moves: PL.moves.map((m) => m.id + m.lvl).join(','), items: PL.items.map((x) => x.id + x.lvl).join(',') };
 }
-window.PS = { NET, autoDecide(mode) { return autoDecide(LU.cards, mode || 'level', PL); }, cardValue(c) { return cardValue(c, autoW()); }, get OBSN() { return OBS.size; }, obsTest(x, z, r) { obsAdd(x, z, r); }, faint(i) { const me = PL; usePlayer(PLAYERS[i]); playerFaint(true); usePlayer(me); }, D, E, get PL() { return PLAYERS[0]; }, get S() { return PLAYERS[0].S; }, PLAYERS, sim, KEYS, scene, camera, tick, getGeo, RAMP, ATLAS, outlineNormals, forceSize(v) { FORCE_SIZE = v; resize(); }, setManual(v) { manualTick = v; }, chooseCard, closeChest, get LU() { return LU; }, PK, get aliveList() { return aliveList.subarray(0, aliveN); }, get RUN() { return RUN; }, startRun, addXp, get state() { return state; }, get aliveN() { return aliveN; }, renderer, BOSSES, spawnBoss, spawnEnemy, dropPickup, get SAVE() { return SAVE; }, DBG, checkAchievements, MENU, buildMenu, togglePause, endRun, SOBJ, get PORTAL() { return PORTAL; }, nextStage, leaveStage, summonStageBoss };
+window.PS = { PERF, PROF, QA, get glitchPass() { return glitchPass; }, prof(on) { if (on !== undefined) { PROF.on = !!on; PROF.t = {}; PROF.n = 0; return; } const o = {}; for (const k in PROF.t) o[k] = +(PROF.t[k] / Math.max(1, PROF.n)).toFixed(3); return o; }, counts() { return PSC(); }, NET, autoDecide(mode) { return autoDecide(LU.cards, mode || 'level', PL); }, cardValue(c) { return cardValue(c, autoW()); }, get OBSN() { return OBS.size; }, obsTest(x, z, r) { obsAdd(x, z, r); }, faint(i) { const me = PL; usePlayer(PLAYERS[i]); playerFaint(true); usePlayer(me); }, D, E, get PL() { return PLAYERS[0]; }, get S() { return PLAYERS[0].S; }, PLAYERS, sim, KEYS, scene, camera, tick, getGeo, RAMP, ATLAS, outlineNormals, forceSize(v) { FORCE_SIZE = v; resize(); }, setManual(v) { manualTick = v; }, chooseCard, closeChest, get LU() { return LU; }, PK, get aliveList() { return aliveList.subarray(0, aliveN); }, get RUN() { return RUN; }, startRun, addXp, get state() { return state; }, get aliveN() { return aliveN; }, renderer, BOSSES, spawnBoss, spawnEnemy, dropPickup, get SAVE() { return SAVE; }, DBG, checkAchievements, MENU, buildMenu, togglePause, endRun, SOBJ, get PORTAL() { return PORTAL; }, nextStage, leaveStage, summonStageBoss };
 init();
 if (DEBUG && QS.has('bot')) { const sc = document.createElement('script'); sc.src = 'tools/bot.js?' + Date.now(); document.body.appendChild(sc); }
+if (DEBUG && QS.has('bench')) { const sc = document.createElement('script'); sc.src = 'tools/benchmark.js?' + Date.now(); document.body.appendChild(sc); }
 })();
 </script>
 </body>
